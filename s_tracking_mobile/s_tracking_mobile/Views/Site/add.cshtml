@@ -1,0 +1,642 @@
+﻿@using System.Configuration;
+@{
+    ViewBag.Title = "Add Site";
+    var path = ViewData["Current_Path"].ToString();
+    var googleMap_url = ConfigurationManager.AppSettings["googleMap_key"];
+}
+
+<div class="content">
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h1>
+                        เพิ่มศูนย์บริการ
+                    </h1>
+                    <div class="form-tools">
+                        <a href="@{@path}site/all" class="back-btn">
+                            กลับ
+                        </a>
+                        <a onclick="btn_save()" class="exitsave-btn">
+                            บันทึกและออก
+                        </a>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <div class="x_panel form">
+                <span class="section">ข้อมูลศูนย์บริการ</span>
+                <!--test-->
+                <!-- step 1 -->
+                <div id="demo-form2" class="form-horizontal form-label-left" novalidate="">
+                    <div class="row">
+                        <!-- left -->
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    โค้ดศูนย์บริการ
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtSiteCode" required="required" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    ผู้ติดต่อ #1
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtContactName1" required="required" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    ผู้ติดต่อ #3
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtContactName3" required="required" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    หมายเลขโทรศัพท์ #2
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtTel2" required="required" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    อีเมล์ #1
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtEmail1" required="required" class="form-control">
+                                    อีเมล์สำหรับส่งแจ้งเตือนแบบสอบถามเชิงลบ
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    อีเมล์ #3
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtEmail3" required="required" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    หมู่บ้าน / ตึก
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtVillage" required="required" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    ถนน
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtStreet" required="required" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12">ตำบล / แขวง</label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <select class="form-control js-example-basic-single" id="selectDistrict">
+                                        <option value="0">เลือกตำบล / แขวง</option>
+                                        @foreach (var item in (List<CommonLib.tb_districts>)ViewData["Districtes"])
+                                        {
+                                            <option value="@item.district_id">@item.district_name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    รหัสไปรษณีย์
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtPostcode" required="required" class="form-control">
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <!-- right -->
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    ชื่อศูนย์บริการ
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtSiteName" required="required" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    ผู้ติดต่อ #2
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtContactName2" required="required" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    หมายเลขโทรศัพท์ #1
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtTel1" required="required" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    หมายเลขโทรศัพท์ #3
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtTel3" required="required" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    อีเมล์ #2
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtEmail2" required="required" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    เลขที่อยู่
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtSiteAddressNo" required="required" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    หมู่ / ซอย
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtMoo" required="required" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12">อำเภอ / เขต</label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <select class="form-control js-example-basic-single" id="selectSubDistrict">
+                                        <option value="0">เลือกอำเภอ / เขต</option>
+                                        @foreach (var item in (List<CommonLib.tb_amphures>)ViewData["Sub_Districtes"])
+                                        {
+                                            <option value="@item.amphur_id">@item.amphur_name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12">จังหวัด</label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <select class="form-control js-example-basic-single" id="selectProvince">
+                                        <option value="0">เลือกจังหวัด</option>
+                                        @foreach (var item in (List<CommonLib.tb_provinces>)ViewData["Provinces"])
+                                        {
+                                            <option value="@item.province_id">@item.province_name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div id="demo-form2" class="form-horizontal form-label-left" novalidate="">
+                    <div class="row">
+                        <!-- left -->
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12">วันที่เปิดศูนย์บริการ 1</label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <select id="site_open_date1">
+                                        <option value="0">เลือกวัน</option>
+                                        @foreach (var item in (List<s_tracking_mobile.Models.date>)ViewData["Date"])
+                                        {
+                                            <option value="@item.day">@item.day</option>
+                                        }
+                                    </select>
+                                    <label> ถึงวันที่ </label>
+                                    <select id="site_open_to_date1">
+                                        <option value="0">เลือกวัน</option>
+                                        @foreach (var item in (List<s_tracking_mobile.Models.date>)ViewData["Date"])
+                                        {
+                                            <option value="@item.day">@item.day</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12">วันที่เปิดศูนย์บริการ 2</label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <select id="site_open_date2">
+                                        <option value="0">เลือกวัน</option>
+                                        @foreach (var item in (List<s_tracking_mobile.Models.date>)ViewData["Date"])
+                                        {
+                                            <option value="@item.day">@item.day</option>
+                                        }
+                                    </select>
+                                    <label> ถึงวันที่ </label>
+                                    <select id="site_open_to_date2">
+                                        <option value="0">เลือกวัน</option>
+                                        @foreach (var item in (List<s_tracking_mobile.Models.date>)ViewData["Date"])
+                                        {
+                                            <option value="@item.day">@item.day</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12">วันที่ปิดศูนย์บริการ</label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <select id="site_close">
+                                        <option value="0">เลือกวัน</option>
+                                        @foreach (var item in (List<s_tracking_mobile.Models.date>)ViewData["Date"])
+                                        {
+                                            <option value="@item.day">@item.day</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <!-- right -->
+                        <div class="col-sm-6 col-xs-12">
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12">เวลาเปิดศูนย์บริการ 1</label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <select id="site_open_time1">
+                                        <option value="0">เลือกเวลา</option>
+                                        @foreach (var item in (List<s_tracking_mobile.Models.times>)ViewData["Time"])
+                                        {
+                                            <option value="@item.time">@item.time</option>
+                                        }
+                                    </select>
+                                    <label> ถึงเวลา </label>
+                                    <select id="site_open_to_time1">
+                                        <option value="0">เลือกเวลา</option>
+                                        @foreach (var item in (List<s_tracking_mobile.Models.times>)ViewData["Time"])
+                                        {
+                                            <option value="@item.time">@item.time</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12">เวลาเปิดศูนย์บริการ 2</label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <select id="site_open_timn2">
+                                        <option value="0">เลือกเวลา</option>
+                                        @foreach (var item in (List<s_tracking_mobile.Models.times>)ViewData["Time"])
+                                        {
+                                            <option value="@item.time">@item.time</option>
+                                        }
+                                    </select>
+                                    <label> ถึงเวลา </label>
+                                    <select id="site_open_to_time2">
+                                        <option value="0">เลือกเวลา</option>
+                                        @foreach (var item in (List<s_tracking_mobile.Models.times>)ViewData["Time"])
+                                        {
+                                            <option value="@item.time">@item.time</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!--/test-->
+
+                <div id="demo-form2" class="form-horizontal form-label-left" novalidate="">
+                    <div class="row">
+                        <!-- left -->
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    Latitude
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtstore_lat" required="required" class="form-control">
+                                    <div class="alert">please put something here</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- right -->
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                    Longitude
+                                </label>
+                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                    <input type="text" id="txtstore_long" required="required" class="form-control">
+                                    <div class="alert">please put something here</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="demo-form2" class="form-horizontal form-label-left" novalidate="">
+                    <!--/Time-->
+                    <div class="form-tools">
+                        <a id="btn_open_map" onclick="open_map()">
+                            แก้ไขจากแผนที่
+                        </a>
+                    </div>
+                    <div class="form-group" id="div_map">
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    #map {
+        height: 400px; /* The height is 400 pixels */
+        width: 100%; /* The width is the width of the web page */
+    }
+
+    #btn_open_map:hover {
+        color: #fff;
+        background-color: #1428a0;
+    }
+
+    .btn_active_map {
+        color: #fff;
+        background-color: #1428a0;
+    }
+</style>
+@section header {
+
+}
+@section scripts {
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <script async defer
+            @*src="https://maps.googleapis.com/maps/api/js?key=@{@googleMap_url}&libraries=places&callback=initMap">*@
+            src="https://maps.googleapis.com/maps/api/js?key=@{@googleMap_url}&libraries=places">
+    </script>
+    <script>
+        var base_url = '@{@path}';
+        // Initialize and add the map
+        var map;
+        var markerCenter;
+        var infowindowCenter;
+        var infowindow;
+        var lat = 13.7468204;
+        var long = 100.53288029999999;
+
+        $(document).ready(function () {
+            $('.js-example-basic-single').select2();
+
+            function setInputFilter(textbox, inputFilter) {
+                ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function (event) {
+                    textbox.addEventListener(event, function () {
+                        if (inputFilter(this.value)) {
+                            this.oldValue = this.value;
+                            this.oldSelectionStart = this.selectionStart;
+                            this.oldSelectionEnd = this.selectionEnd;
+                        } else if (this.hasOwnProperty("oldValue")) {
+                            this.value = this.oldValue;
+                            this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                        }
+                    });
+                });
+            }
+
+            setInputFilter(document.getElementById("txtTel1"), function (value) {
+                return /^-?\d*$/.test(value);
+            });
+
+            setInputFilter(document.getElementById("txtTel2"), function (value) {
+                return /^-?\d*$/.test(value);
+            });
+
+            setInputFilter(document.getElementById("txtTel3"), function (value) {
+                return /^-?\d*$/.test(value);
+            });
+        });
+
+        function emailIsValid(email) {
+            return /^[^\s]+[^\s]+\.[^\s]+$/.test(email)
+        }
+
+        function btn_save() {
+            //check
+            var returnEmail = emailIsValid(document.getElementById('txtEmail1').value);
+            var checkSiteName = document.getElementById('txtSiteName').validity.valid;
+            var checkSiteCode = document.getElementById('txtSiteCode').validity.valid;
+            var checkContact = document.getElementById('txtContactName1').validity.valid;
+            var checkTel = document.getElementById('txtTel1').validity.valid;
+
+            //if (checkSiteName && checkSiteCode && checkContact && (returnEmail || document.getElementById('txtEmail1').value == "")) {
+            if (checkSiteName && checkSiteCode && checkContact && returnEmail && checkTel) {
+                var txt = {
+                    site_name: document.getElementById('txtSiteName').value,
+                    code_store: document.getElementById('txtSiteCode').value,
+                    contact1: document.getElementById('txtContactName1').value,
+                    contact2: document.getElementById('txtContactName2').value,
+                    contact3: document.getElementById('txtContactName3').value,
+                    tel1: document.getElementById('txtTel1').value,
+                    tel2: document.getElementById('txtTel2').value,
+                    tel3: document.getElementById('txtTel3').value,
+                    email1: document.getElementById('txtEmail1').value,
+                    email2: document.getElementById('txtEmail2').value,
+                    email3: document.getElementById('txtEmail3').value,
+                    site_address: document.getElementById('txtSiteAddressNo').value,
+                    village: document.getElementById('txtVillage').value,
+                    moo: document.getElementById('txtMoo').value,
+                    street: document.getElementById('txtStreet').value,
+                    sub_district: document.getElementById('selectSubDistrict').value,
+                    district: document.getElementById('selectDistrict').value,
+                    province: document.getElementById('selectProvince').value,
+                    country: 0,
+                    postcode: document.getElementById('txtPostcode').value,
+                    store_close: document.getElementById('site_close').value,
+                    store_opendate1: document.getElementById('site_open_date1').value,
+                    store_to_opendate1: document.getElementById('site_open_to_date1').value,
+                    store_opentime1: document.getElementById('site_open_time1').value,
+                    store_to_opentime1: document.getElementById('site_open_to_time1').value,
+                    store_opendate2: document.getElementById('site_open_date2').value,
+                    store_to_opendate2: document.getElementById('site_open_to_date2').value,
+                    store_opentime2: document.getElementById('site_open_timn2').value,
+                    store_to_opentime2: document.getElementById('site_open_to_time2').value,
+                    store_lat: document.getElementById('txtstore_lat').value,
+                    store_long: document.getElementById('txtstore_long').value
+                };
+                $.ajax({
+                    url: base_url + "site/btn_save_store",
+                    type: "POST",
+                    contentType: 'application/json',
+                    data: JSON.stringify(txt),
+                    success: function (obj) {
+                        if (_.isArray(obj)) {
+                            $("#txtSiteName").next().remove(); $("#txtSiteCode").next().remove(); $("#txtContactName1").next().remove();
+                            $("#txtContactName2").next().remove(); $("#txtContactName3").next().remove(); $("#txtTel1").next().remove();
+                            $("#txtTel2").next().remove(); $("#txtTel3").next().remove(); $("#txtEmail1").next().remove();
+                            $("#txtEmail2").next().remove(); $("#txtEmail3").next().remove(); $("#txtSiteAddressNo").next().remove();
+                            $("#txtVillage").next().remove(); $("#txtMoo").next().remove(); $("#txtStreet").next().remove();
+                            $("#txtPostcode").next().remove(); $("#txtstore_lat").next().remove(); $("#txtstore_long").next().remove();
+                            $.each(obj, function (idx, val) {
+                                var text = '<div class="alert">' + val.text + '</div>';
+                                $(val.name_div).parents(".form-group").addClass('warning')
+                                $(val.name_div).after(text)
+                            });
+                            $(obj[0].name_div).focus();
+                        }
+                        else {
+                             window.location.href = base_url + "site/all"
+                        }
+                    },
+                    error: function (err) {
+
+                    }
+                });
+            } else {
+                $("#txtSiteName").next().remove(); $("#txtSiteCode").next().remove(); $("#txtContactName1").next().remove();
+                $("#txtEmail1").next().remove(); $("#txtTel1").next().remove();
+                checkSiteName == false ? $('#txtSiteName').parents(".form-group").addClass('warning') && $("#txtSiteName").after("<div class='alert'>กรุณาระบุชื่อศูนย์บริการ</div>") : $('#txtSiteName').parents(".form-group").removeClass('warning');
+                checkSiteCode == false ? $('#txtSiteCode').parents(".form-group").addClass('warning') && $("#txtSiteCode").after("<div class='alert'>กรุณาระบุโค้ดศูนย์บริการ</div>") : $('#txtSiteCode').parents(".form-group").removeClass('warning');
+                checkContact == false ? $('#txtContactName1').parents(".form-group").addClass('warning') && $("#txtContactName1").after("<div class='alert'>กรุณาระบุผู้ติดต่อ</div>") : $('#txtContactName1').parents(".form-group").removeClass('warning');
+                returnEmail == false ? $('#txtEmail1').parents(".form-group").addClass('warning') && $("#txtEmail1").after("<div class='alert'>กรุณาระบุอีเมล์</div>") : $('#txtEmail1').parents(".form-group").removeClass('warning');
+                checkTel == false ? $('#txtTel1').parents(".form-group").addClass('warning') && $("#txtTel1").after("<div class='alert'>กรุณาระบุหมายเลขโทรศัพท์</div>") : $('#txtTel1').parents(".form-group").removeClass('warning');
+
+                var focus = checkSiteCode == false ? "#txtSiteCode" : checkSiteName == false ? "#txtSiteName" : checkContact == false ? "#txtContactName1" : returnEmail == false ? "#txtEmail1" : "#txtTel1";
+                $(focus).focus();
+            }
+        }
+
+        //GOOGLE MAP
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 18,
+                center: { lat: lat, lng: long },
+                mapTypeId: 'terrain'
+            });
+            markerCenter = new google.maps.Marker({
+                position: map.getCenter(),
+                map: map
+            });
+            infowindowCenter = new google.maps.InfoWindow;
+            infowindow = new google.maps.InfoWindow;
+            markerCenter.setMap(map);
+
+            map.addListener('bounds_changed', function () {
+                changePointer();
+            });
+
+            /// SEARCH
+            var input = document.getElementById('pac-input');
+            var searchBox = new google.maps.places.SearchBox(input);
+            map.addListener('idle', function () {
+                // console.log('idle');
+                searchBox.setBounds(map.getBounds());
+                var geocoder = new google.maps.Geocoder;
+                var infowindow = new google.maps.InfoWindow;
+                geocodeLatLng(geocoder, map, infowindow);
+            });
+
+            searchBox.addListener('places_changed', function () {
+                var places = searchBox.getPlaces();
+
+                if (places.length == 0) {
+                    return;
+                }
+                // deleteMarkers();
+                map.setCenter(places[0].geometry.location);
+                var geocoder = new google.maps.Geocoder;
+                var infowindow = new google.maps.InfoWindow;
+                geocodeLatLng(geocoder, map, infowindow);
+            });
+        }
+
+        // ADD MARKER
+
+        function changePointer() {
+            lat = map.center.lat();
+            long = map.center.lng();
+            document.getElementById('txtstore_lat').value = lat;
+            document.getElementById('txtstore_long').value = long;
+            markerCenter.setPosition(map.center);
+        }
+
+        //function changeMarker(location, content = null) {
+        function changeMarker(location, content) {
+            // var infowindow = new google.maps.InfoWindow;
+            infowindowCenter.setContent(content);
+            infowindowCenter.open(map, markerCenter);
+        }
+
+        ///    GEOREVERSE
+        function geocodeLatLng(geocoder, map, infowindow) {
+            geocoder.geocode({ 'location': map.getCenter() }, function (results, status) {
+                if (status === 'OK') {
+                    if (results[0]) {
+                        // deleteMarkers();
+                        changeMarker(map.getCenter(), results[0].formatted_address);
+                    } else {
+                        window.alert('No results found');
+                    }
+                } else {
+                    window.alert('Geocoder failed due to: ' + status);
+                }
+            });
+        }
+
+        //// CURRENT DEVICE LOCATION
+
+        function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+            infoWindow.setPosition(pos);
+            infoWindow.setContent(browserHasGeolocation ?
+                'Error: The Geolocation service failed.' :
+                'Error: Your browser doesn\'t support geolocation.');
+            infoWindow.open(map);
+            }
+
+        function open_map() {
+            var html = '';
+            if ($("#btn_open_map").hasClass('btn_active_map')) {
+                $("#btn_open_map").removeClass("btn_active_map");
+                $("#div_map").html("");
+            } else {
+                $("#btn_open_map").addClass("btn_active_map");
+                html += '<span class="section">เลื่อนแผนที่เพื่อระบุตำแหน่ง</span>'
+                html += '<div class="col-md-4 col-sm-4 col-xs-12">'
+                html += '<input type="text" id="pac-input" required="required" placeholder="กรอกสถานที่" class="form-control">'
+                html += '</div>'
+                html += '<div id="map"></div>'
+                $("#div_map").append(html);
+                initMap();
+            }
+        }
+    </script>
+}

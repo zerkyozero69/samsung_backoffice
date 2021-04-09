@@ -1,0 +1,324 @@
+﻿@{
+    ViewBag.Title = "Done Survey";
+    var path = ViewData["Current_Path"];
+    var count = ViewData["Count"];
+    var site = ViewData["site"] as List<CommonLib.tb_store>;
+    var input_start = ViewData["input_start"] as string;
+    var input_end = ViewData["input_end"] as string;
+}
+<div class="content">
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h1>
+                        แบบสอบถามทั้งหมด
+                    </h1>
+                    <div class="x_content table_tools">
+                        <div class="row">
+                            <div class="form-group">
+                                <div class="filter-job">
+                                    <div class="col-sm-2">
+                                        <input class="form-control type="text" id="service_no" />
+                                    </div>
+                                    <div class="col-sm-2" hidden>
+                                        <select id="status" class="form-control js-example-basic-single">
+                                            <option value="">ทุกสถานะ</option>
+                                            <option value="1">Send SMS</option>
+                                            <option value="2">Open Link</option>
+                                            <option value="3">Submitted</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <select id="site" class="form-control js-example-basic-single">
+                                            <option value="0">เลือกศูนย์บริการ</option>
+                                            @foreach (var s in site)
+                                            {
+                                                <option value="@s.id">@s.site_name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <select id="negative" class="form-control js-example-basic-single">
+                                            <option value="">ทุกผลลัพธ์</option>
+                                            <option value="0">Positive</option>
+                                            <option value="1">Negative</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        @{
+                                            <input type="text" value="@input_start" class="form-control start-date-input" placeholder="วันที่เริ่มแบบสอบถาม" id="single_cal2">
+                                        }
+                                    </div>
+                                    <div class="col-sm-2">
+                                        @{
+                                            <input type="text" value="@input_end" class="form-control end-date-input" placeholder="วันที่จบแบบสอบถาม" id="single_cal3">
+                                        }
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <a onclick="btn_search()" class="tableview submit">
+                                            ค้นหา
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <a onclick="excel()">
+                                            Export
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <div class="table-tabs">
+                <div class="tab-content">
+                    <table class="table main-table">
+                        <thead>
+                            <tr>
+                                <th>หมายเลขงาน</th>
+                                <th>ชื่อช่าง</th>
+                                <th>ศูนย์บริการ</th>
+                                <th>คะแนน</th>
+                                <th>negative</th>
+                                <th style="text-align:center">ผลตอบรับศูนย์บริการ</th>
+                                <th>วันที่ประเมิน</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyUser">
+                            @foreach (var item in (List<s_tracking_mobile.Models.survey_all>)ViewData["Data"])
+                            {
+                            <tr>
+                                <td>
+                                    @item.service_no
+                                </td>
+                                <td>@item.engineer_name</td>
+                                <td>@item.site</td>
+                                <td>@item.score</td>
+                                <td>@item.negative</td>
+                                <td style="text-align:center" >@item.is_feedback</td>
+                                <td>@item.cre_date.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="dLabel">
+                                            <li>
+                                                @*<a onclick="edit('@item.job_guid')">*@
+                                                <a href="@(path)job/edit?id=@(item.job_guid)#4">
+                                                    <span> ดูรายละเอียด</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div class="clearfix"></div>
+                    <nav aria-label="Page navigation" id="datatable_paginate">
+                        <ul class="pagination"></ul>
+                    </nav>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section header {
+}
+@section scripts {
+    <script>
+        var base_url = '@{@path}';
+    $(document).ready(function () {
+        pagination(@count , 1);
+        });
+
+        function edit(id) {
+            window.location.href = base_url + "job/edit?id=" + id + "#4";
+        }
+
+        function excel() {
+            var service_no = document.getElementById('service_no').value;
+            var status = document.getElementById('status').value;
+            var negative = document.getElementById('negative').value;
+            var site = document.getElementById('site').value;
+            var start = $('#single_cal2').val().split("/")
+            var end = $('#single_cal3').val().split("/")
+
+            start = start[1] + "/" + start[0] + "/" + start[2];
+            end = end[1] + "/" + end[0] + "/" + end[2];
+
+            window.open(base_url + 'survey/export?service_no=' + service_no + '&status=' + status + '&negative=' + negative + '&str_start=' + start + '&str_end=' + end + '&site=' + site,'_blank' );
+        }
+
+    function pagination(count, page) {
+        var count = count;
+        var html = "";
+        var count_page = 0;
+        if (count > 0) {
+            var currentValue = parseInt(page);
+            var back_page = currentValue - 1;
+            var page = parseInt(page, 10);
+            var check_page = 0;
+            var style_back = page == 1 ? "pointer-events: none;" : "";
+            html += '<li><a onClick="click_page(\'' + 1 + '\')" aria-label="Previous"><span aria-hidden="true">First</span></a></li>';
+            html += '<li style="' + style_back + '"><a onClick="click_page(\'' + back_page + '\')" aria-label="Previous"><span aria-hidden="true"><span class="glyphicon glyphicon-menu-left"></span></span></a></li>';
+
+            //check all page
+            for (i = 0; i < count; i += 20) {
+                check_page++;
+            }
+
+            for (i = 0; i < count; i += 20) {
+                count_page++;
+                var style = count_page == page ? 'active' : '';
+
+                if (count_page == page || count_page == page - 2 || count_page == page - 1 || count_page == page + 1 || count_page == page + 2) {
+                    html += '<li class="paginate_button ' + style + '"><a onClick="click_page(\'' + count_page + '\')" aria-controls="datatable" tabindex="0">' + count_page + '</a></li>';
+                }
+                // first
+                else if (page == 1 && (count_page == 4 || count_page == 5)) {
+                    html += '<li class="paginate_button ' + style + '"><a onClick="click_page(\'' + count_page + '\')" aria-controls="datatable" tabindex="0">' + count_page + '</a></li>';
+                }
+                // second
+                else if (page == 2 && (count_page == 5)) {
+                    html += '<li class="paginate_button ' + style + '"><a onClick="click_page(\'' + count_page + '\')" aria-controls="datatable" tabindex="0">' + count_page + '</a></li>';
+                }
+                // before last
+                else if (page == check_page - 1 && (count_page == check_page - 4)) {
+                    html += '<li class="paginate_button ' + style + '"><a onClick="click_page(\'' + count_page + '\')" aria-controls="datatable" tabindex="0">' + count_page + '</a></li>';
+                }
+                //last
+                else if (page == check_page && (count_page == check_page - 3 || count_page == check_page-4)) {
+                    html += '<li class="paginate_button ' + style + '"><a onClick="click_page(\'' + count_page + '\')" aria-controls="datatable" tabindex="0">' + count_page + '</a></li>';
+                }
+            }
+            var style_next = count_page == page ? "pointer-events: none;" : "";
+            var currentValue = parseInt(page);
+            var next_page = currentValue+1;
+            html += '<li style="' + style_next + '"><a onClick="click_page(\'' + next_page + '\')" aria-label="Next"><span aria-hidden="true"><span class="glyphicon glyphicon-menu-right"></span></span></a></li>';
+            html += '<li><a onClick="click_page(\'' + count_page + '\')" aria-label="Next"><span aria-hidden="true">Last</span></a></li>';
+            $('.pagination').append(html);
+        }
+    }
+
+    function click_page(page) {
+
+        var service_no = document.getElementById('service_no').value;
+        var status = document.getElementById('status').value;
+        var negative = document.getElementById('negative').value;
+        var site = document.getElementById('site').value;
+        var start = $('#single_cal2').val().split("/")
+        var end = $('#single_cal3').val().split("/")
+
+        start = start[1] + "/" + start[0] + "/" + start[2];
+        end = end[1] + "/" + end[0] + "/" + end[2];
+
+        $("#tbodyUser").html("");
+        $('.pagination').html("");
+        $.ajax({
+            url: base_url + "survey/page_all",
+            type: "get",
+            data: { service_no: service_no, status: status, negative: negative, page: page, str_start: start, str_end: end, site: site },
+            success: function (data) {
+                var html = "";
+                var obj = JSON.parse(data);
+
+                if (obj[0] != null) {
+                    var count = obj[0].count;
+                    pagination(count, page);
+                    $.each(obj, function (key, val) {
+                        var d = new Date(val.cre_date)
+                        html += '<tr>'
+                        html += '<td>' + val.service_no + '</td>'
+                        html += '<td>' + val.engineer_name + '</td>'
+                        html += '<td>' + val.site + '</td>'
+                        html += '<td>' + val.score.toFixed(2) + '</td>'
+                        html += '<td>' + val.negative + '</td>'
+                        html += '<td style="text-align:center">' + val.is_feedback + '</td>'
+                        html += '<td>' + d.getDate() + "/" + Number(d.getMonth() + 1) + "/" + d.getFullYear() + '</td>'
+                        html += '<td>';
+                        html += '<div class="dropdown">';
+                        html += '<a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></a>';
+                        html += '<ul class="dropdown-menu" aria-labelledby="dLabel">';
+                        html += '<li><a onclick="edit(\'' + val.job_guid + '\')"><span> ดูรายละเอียด</span></a></li>';
+                        html += '</ul>'
+                        html += '</div>';
+                        html += '</td>';
+
+                        html += '</tr>'
+                    });
+                    $("#tbodyUser").append(html);
+                }
+
+            },
+            error: function (err) {
+                $("#tbodyUser").append("error");
+            }
+        });
+        $("html, body").animate({ scrollTop: 0 }, "slow");
+    }
+
+    function btn_search() {
+        var service_no = document.getElementById('service_no').value;
+        var status = document.getElementById('status').value;
+        var negative = document.getElementById('negative').value;
+        var site = document.getElementById('site').value;
+        
+        var start = $('#single_cal2').val().split("/")
+        var end = $('#single_cal3').val().split("/")
+
+        start = start[1] + "/" + start[0] + "/" + start[2];
+        end = end[1] + "/" + end[0] + "/" + end[2];
+  
+
+        $("#tbodyUser").html("");
+        $('.pagination').html("");
+        $.ajax({
+            url: base_url + "survey/page_all",
+            type: "get",
+            data: { service_no: service_no, status: status, negative: negative, str_start: start, str_end: end, site: site },
+            success: function (val) {
+                var html = "";
+                var obj = JSON.parse(val);
+
+                if (obj[0] != null) {
+                    var count = obj[0].count;
+                    pagination(count, 1);
+                    $.each(obj, function (key, val) {
+                        var d = new Date(val.cre_date)
+                        html += '<tr>'
+                        html += '<td>' + val.service_no + '</td>'
+                        html += '<td>' + val.engineer_name + '</td>'
+                        html += '<td>' + val.site + '</td>'
+                        html += '<td>' + val.score.toFixed(2) + '</td>'
+                        html += '<td>' + val.negative + '</td>'
+                        html += '<td style="text-align:center">' + val.is_feedback + '</td>'
+                        html += '<td>' + d.getDate() + "/" + Number(d.getMonth() + 1) + "/" + d.getFullYear() + '</td>'
+                        html += '<td>';
+                        html += '<div class="dropdown">';
+                        html += '<a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></a>';
+                        html += '<ul class="dropdown-menu" aria-labelledby="dLabel">';
+                        html += '<li><a onclick="edit(\'' + val.job_guid + '\')"><span> ดูรายละเอียด</span></a></li>';
+                        html += '</ul>'
+                        html += '</div>';
+                        html += '</td>';
+
+                        html += '</tr>'
+                    });
+                    $("#tbodyUser").html(html);
+                }
+
+            },
+            error: function (err) {
+                $("#tbodyUser").html("error");
+            }
+        });
+        }
+    </script>
+}

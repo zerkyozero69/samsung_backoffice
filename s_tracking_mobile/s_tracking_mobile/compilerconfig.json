@@ -1,0 +1,14 @@
+﻿[
+  {
+    "outputFile": "assets/css/ss-engineer.css",
+    "inputFile": "assets/scss/ss-engineer.scss"
+  },
+  {
+    "outputFile": "assets/css/_ss_engineer_service_request.css",
+    "inputFile": "assets/scss/_ss_engineer_service_request.scss"
+  },
+  {
+    "outputFile": "assets/css/custom.css",
+    "inputFile": "assets/scss/custom.scss"
+  }
+]

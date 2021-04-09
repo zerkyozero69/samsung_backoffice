@@ -1,0 +1,298 @@
+﻿@using System.Configuration;
+@{
+    ViewBag.Title = "ระบบการแจ้งเตือน แบบสอบถามเชิงลบ : SWAT Application";
+    Layout = null;
+    string path = ConfigurationManager.AppSettings["Base_URL"];
+    var survey = (s_tracking_mobile.Models.Survey_Export)ViewData["survey"];
+}
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <!-- <title>Simple Transactional Email</title> -->
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>*@
+    <link rel="stylesheet" href="@(path)assets_mail/css/bootstrap.css" />
+    <link rel="stylesheet" href="@(path)assets_mail/css/style.css" />
+    <!-- jQuery -->
+    <script src="@{@path}assets/vendors/jquery/dist/jquery.min.js"></script>
+    <script src="@(path)assets_mail/js/bootstrap.bundle.js"></script>
+    <title>ระบบการแจ้งเตือน แบบสอบถามเชิงลบ : SWAT Application</title>
+
+
+    <style>
+        #submit_btn {
+            color:white
+        }
+    </style>
+
+</head>
+<body class="negative-result-form bg-color">
+    <table role="presentation" cellpadding="0" cellspacing="0" class="body">
+        <tr>
+            <td>&nbsp;</td>
+            <td class="container">
+                <div class="content">
+                    <!-- START CENTERED WHITE CONTAINER -->
+                    <table role="presentation" class="main">
+                        <tr>
+                            <td class="wrapper">
+                                <table role="presentation" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td>
+                                            <img src="@{@path}assets_mail/images/logo-samsung.png ">
+                                            <br />
+                                            <span class="text-description">SWAT INSTALLER</span>
+                                            <br />
+                                            <hr></hr>
+                                            <h4>ระบบการแจ้งเตือน แบบสอบถามเชิงลบ</h4>
+
+                                            <span class="text-description">
+                                                เรียนผู้ที่เกี่ยวข้อง ระบบได้ทำการแจ้งเตือนผลการประเมินการทำงานที่ไม่ผ่านการประเมิน โดยท่านสามารถดูข้อมูลงาน
+                                                และผลการประเมินได้จากข้อมูลด้านล่างนี้
+                                            </span>
+                                            <hr>
+                                            <div class="header-title">ข้อมูลงาน</div>
+                                            <div class="work-detail">
+                                                <span class="title-left">หมายเลขงาน :</span>
+                                                <div class="title-right">
+                                                    @*<span class="work-no">4304168378</span>*@
+                                                    <span class="work-no">@survey.service_no</span>
+                                                </div>
+                                            </div>
+                                            <div class="work-detail">
+                                                <span class="title-left">ช่างที่ได้รับมอบหมาย :</span>
+                                                <div class="title-right">
+                                                    <span class="tech-name">@survey.engineer</span>
+                                                </div>
+                                            </div>
+                                            <div class="work-detail">
+                                                <span class="title-left">รหัสช่าง :</span>
+                                                <div class="title-right">
+                                                    <span class="tech-no">@survey.engineer_code</span>
+                                                </div>
+                                            </div>
+                                            <div class="work-detail">
+                                                <span class="title-left">ข้อมูลลูกค้า :</span>
+                                                <div class="title-right">
+                                                    <span class="cus-no">@survey.customer</span>
+                                                </div>
+                                            </div>
+                                            <div class="work-detail">
+                                                <span class="title-left">เบอร์ติดต่อ :</span>
+                                                <div class="title-right">
+                                                    <span class="cus-tel">@survey.customer_phone</span>
+                                                </div>
+                                            </div>
+                                            <br />
+                                            @*<div class="header-title">ผลการประเมินผลงาน</div>
+                                            <div class="work-detail">
+                                                <div class="title-left">ผลการประเมิน :</div>
+                                                <div class="title-right">
+                                                    <span class="total-score">@survey.total_score</span> คะแนน 
+                                                </div>
+                                            </div>*@
+                                            <div class="work-detail">
+                                                <div class="title-left">ประเมินวันที่ :</div>
+                                                <div class="title-right">
+                                                    <span class="work-date">@survey.survey_date.ToString("dd/MMMM/yyyy")</span>
+                                                </div>
+                                            </div>
+                                            <hr>
+                                            <br />
+                                            <div class="header-title">ผลลัพธ์คำถามทั่วไป</div>
+                                            <div class="table-result">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>ลำดับ</th>
+                                                            <th class="col1">คำถาม</th>
+                                                            <th>คำตอบ</th>
+                                                            <th>คะแนน</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in survey.qna.Where(w => w.sub_type != 1).ToList())
+                                                        {
+                                                            <tr>
+                                                                <td class="no-reult">@item.setorder</td>
+                                                                <td class="text-left que-reult">@item.quest</td>
+                                                                <td class="answer-reult">@item.answer</td>
+                                                                <td class="score-reult">@item.score</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <br />
+                                            <div class="header-title">ผลลัพธ์คำถามตามหมวดหมู่</div>
+                                            <div class="table-result">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>ลำดับ</th>
+                                                            <th class="col2">คำถาม</th>
+                                                            <th>หมวดหมู่</th>
+                                                            <th>คำตอบ</th>
+                                                            <th>คะแนน</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in survey.qna.Where(w => w.sub_type == 1).ToList())
+                                                        {
+                                                            <tr>
+                                                                <td class="no-reult">@item.setorder</td>
+                                                                <td class="text-left que-reult">@item.quest</td>
+                                                                <td class="text-left que-reult">@item.cate</td>
+                                                                <td class="answer-reult">@item.answer</td>
+                                                                <td class="score-reult">@item.score</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <br />
+                                            <div class="header-title">ข้อเสนอแนะ จากลูกค้า</div>
+                                            <span class="comment-customer">@survey.comment</span>
+                                            <hr>
+                                            <div class="header-title">ผลการตอบรับจากศูนย์บริการ</div>
+                                            <span class="text-description">
+                                                กรุณาระบุถึงแนวทางการแก้ไข สาเหตุที่ลูกค้าไม่พึงพอใจ เพื่อนำเสนอแนะนำมาปรับปรุงประสิทธิภาพในการบริการ
+                                            </span>
+                                            <br>
+                                            <br>
+                                            <textarea required id="res_textarea" class="form-control @*is-invalid*@" rows="4"></textarea>
+                                            @*<div class="invalid-feedback">Error</div>*@
+                                            <br />
+                                            <br />
+                                            <div class="header-title">เจ้าหน้าที่ผู้ให้ข้อมูล</div>
+                                            <input required id="res_input" class="form-control @*is-invalid*@"
+                                                   placeholder="กรุณาใส่ ชื่อ - นามสกุล ผู้ที่ให้ข้อมูล">
+
+                                            @*<div class="invalid-feedback">Error</div>*@
+                                            <br />
+                                            <br />
+
+                                            @if (survey != null && survey.is_feedback == 1)
+                                            {
+                                                <div class="header-title">สถานะ ส่งข้อมูลเรียบร้อย @(survey.feedback_date != null ? survey.feedback_date.Value.ToString("dd/MM/yyyy").ToString() : "") โดย @(survey.user_feedback)</div>
+                                            }
+                                            <div id="lb_suc" class="header-title"></div>
+
+                                                <div class="d-flex justify-content-center">
+                                                    @if (survey != null && survey.is_feedback != 1)
+                                                    {
+                                                        <button onclick="save()" class="form-control btn-send" id="submit_btn">
+                                                            <a @*href="#open-modal"*@>ส่งข้อมูล</a>
+                                                        </button>
+                                                    }
+
+                                                </div>
+                                                <div class="modal fade" id="open-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                    <div class="modal-dialog" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <button type="button" class="close modal-close" data-dismiss="modal">
+                                                                    <img src="@{@path}assets_mail/images/close-ico.png">
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <h4>ส่งข้อมูลเรียบร้อย</h4>
+                                                                <span>
+                                                                    เจ้าหน้าที่ได้ทำการส่งข้อมูลไปยังระบบเป็นที่เรียบร้อย<br>
+                                                                    หากพบปัญหา ติดต่อ admin@mail.com
+                                                                </span>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button class="form-control btn-close" data-dismiss="modal">
+                                                                    ตกลง
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                    <!-- END CENTERED WHITE CONTAINER -->
+                </div>
+            </td>
+            <td>&nbsp;</td>
+        </tr>
+    </table>
+</body>
+</html>
+
+<script>
+        var base_url = '@{@path}';
+
+        $(document).ready(function () {
+
+        });
+
+
+        function save() {
+
+            $('#res_input').removeClass("is-invalid");
+            $('#res_textarea').removeClass("is-invalid");
+
+
+            if ($('#res_textarea').val() != "" && $('#res_input').val() != "") {
+
+
+
+                $('#lb_ps').removeClass("text-danger");
+                $('#lb_con_ps').removeClass("text-danger");
+                $('#vali_ps').hide();
+                $('#vali_con_ps').hide();
+                $('#ps').removeClass("is-invalid");
+                $('#con_ps').removeClass("is-invalid");
+
+                let body = {
+                    id: @survey.id,
+                    textarea: $('#res_textarea').val(),
+                    input: $('#res_input').val()
+                }
+
+                $.ajax({
+                    url: base_url + "survey/SaveNegativeForm",
+                    data: body,
+                    type: "POST",
+                    success: function (val) {
+
+                        if (val == "true") {
+                            var now = new Date();
+                            $('#open-modal').modal('toggle')
+                            $('#submit_btn').hide();
+                 
+                            $('#lb_suc').text("สถานะ ส่งข้อมูลเรียบร้อย " + now.getDate() + "/" + now.getMonth() + "/" + now.getFullYear() + " " + now.getHours() + ":" + now.getMinutes() + " โดย : " + $('#res_input').val());
+
+                        }
+                        else {
+
+                            $('#lb_ps').addClass("text-danger");
+                            $('#lb_con_ps').addClass("text-danger");
+                            $('#ps').addClass("is-invalid");
+                            $('#con_ps').addClass("is-invalid");
+                            $('#vali_ps').show();
+                            $('#vali_con_ps').show();
+                        }
+                    },
+                    error: function (err) {
+                        console.log(err)
+                    }
+                })
+            }
+            else {
+
+                $('#res_input').addClass("is-invalid");
+                $('#res_textarea').addClass("is-invalid");
+
+            }
+
+        }
+    
+</script>

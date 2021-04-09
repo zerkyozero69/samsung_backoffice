@@ -1,0 +1,450 @@
+﻿@using System.Configuration;
+@{
+                /**/
+
+                Layout = null;
+                ViewBag.Title = "Index";
+                string path = ConfigurationManager.AppSettings["Base_URL"];
+                string azure = ConfigurationManager.AppSettings["Azure_url"];
+                string map_key = ConfigurationManager.AppSettings["googleMap_key"];
+                var job_engi = (s_tracking_mobile.Models.index)ViewData["job_engi"];
+                string PlusTimeJourney = ConfigurationManager.AppSettings["PlusTimeJourney"];
+                var key = ViewData["Key_Azure"];
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=320, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <!-- Bootstrap -->
+    <link href="@{@path}assets/css/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="@{@path}assets/css/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <!-- NProgress -->
+    <link href="@{@path}assets/css/nprogress/nprogress.css" rel="stylesheet">
+    <!-- jQuery custom content scroller -->
+    <link href="@{@path}assets/css/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet" />
+    <!-- Custom Theme Style -->
+    <!-- <link href="assets/css/custom.css" rel="stylesheet"> -->
+    <link href="@{@path}assets/css/_ss-engineer_customer.css" rel="stylesheet">
+    <!-- <link href="assets/css/ss-engineer.css" rel="stylesheet"> -->
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+        }
+    </style>
+    <script type='text/javascript'>
+        var appInsights = window.appInsights || function (config) {
+            function r(config) { t[config] = function () { var i = arguments; t.queue.push(function () { t[config].apply(t, i) }) } }
+            var t = { config: config }, u = document, e = window, o = 'script', s = u.createElement(o), i, f; for (s.src = config.url || '//az416426.vo.msecnd.net/scripts/a/ai.0.js', u.getElementsByTagName(o)[0].parentNode.appendChild(s), t.cookie = u.cookie, t.queue = [], i = ['Event', 'Exception', 'Metric', 'PageView', 'Trace', 'Ajax']; i.length;)r('track' + i.pop()); return r('setAuthenticatedUserContext'), r('clearAuthenticatedUserContext'), config.disableExceptionTracking || (i = 'onerror', r('_' + i), f = e[i], e[i] = function (config, r, u, e, o) { var s = f && f(config, r, u, e, o); return s !== !0 && t['_' + i](config, r, u, e, o), s }), t
+        }({
+            instrumentationKey: 'a4eb2873-2f78-45b2-baf7-d7595b556eaa'
+        });
+
+        window.appInsights = appInsights;
+        appInsights.trackPageView();
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="customer_location">
+            <div class="header-customer">
+                <img src="@{@path}assets/images/Logo_SWAT.png">
+                @*<span>SWAT Application</span>*@
+            </div>
+
+            <div class="step-one" id="step-one" style="display:none">
+                <div class="title-step">
+                    <h2><span>STEP 1</span> เลือกตำแหน่งที่อยู่รับบริการซ่อมสินค้า</h2>
+                </div>
+                <div class="search-location">
+                    <input type="text" placeholder="ค้นหาที่อยู่หรือชื่อสถานที่ใกล้เคียง" id="pac-input" />
+                    <button class="fa fa-search form-control-feedback"> </button>
+                </div>
+
+                <div class="popup-location">
+                    <div class="text-location">
+                        <span id="location_info"></span>
+                        <a href="#" class="location-popup-close"></a>
+                    </div>
+                </div>
+
+                <div class="button button-one" onclick="two()">
+                    <div class="bt-wrap">
+                        <a class="bt-next">
+                            ถัดไป
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="step-two" id="step-two" style="display:none">
+                <div class="title-step">
+                    <h2><span>STEP 2</span> ยืนยันตำแหน่งที่อยู่รับบริการซ่อมสินค้า</h2>
+                </div>
+                @*<div class="title-location">
+                        <span>สถานที่ใกล้เคียง</span>
+                    </div>*@
+                <div class="location-detail">
+                    @*<input type="text" name="" value="BIG C สะพานควาย">*@
+                    <div class="show-detail">
+                        <span id="show_loca"></span>
+                    </div>
+                    <div class="show-customer-detail">
+                        <ul>
+                            <li class="title">ชื่อ - นามสกุล</li>
+                            <li class="don">:</li>
+                            <li class="detail">@job_engi.customer_fullname</li>
+                        </ul>
+                        <ul>
+                            <li class="title">เบอร์โทรศัพท์</li>
+                            <li class="don">:</li>
+                            <li class="detail">@job_engi.customer_mobile</li>
+                        </ul>
+                    </div>
+                    <div class="show-customer-detail">
+                        <ul>
+                            <li class="title">หมายเลขงาน</li>
+                            <li class="don">:</li>
+                            <li class="detail">@job_engi.service_order_no</li>
+                        </ul>
+                        <ul>
+                            <li class="title">วันที่นัดหมาย</li>
+                            <li class="don">:</li>
+                            <li class="detail">@job_engi.appointment_datetime.Value.Day/@job_engi.appointment_datetime.Value.Month/@job_engi.appointment_datetime.Value.Year</li>
+                        </ul>
+                        <ul>
+                            <li class="title">เวลาที่นัดหมาย</li>
+                            <li class="don">:</li>
+                            <li class="detail">@job_engi.appointment_datetime.Value.TimeOfDay</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="button-two">
+                    <div class="bt-wrap">
+                        <a class="bt-next" onclick="edit()">
+                            ยืนยันตำแหน่ง
+                        </a>
+                        <a class="bt-next button-cancel" onclick="back()">
+                            ยกเลิก
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-three" id="step-three">
+                <div class="title-step">
+                    <h2>ข้อมูลช่าง</h2>
+                </div>
+                <div class="title-time">
+                    <span id="output">-</span>
+                </div>
+                <div class="show-detail-customer">
+                    @if (job_engi.engi.pictuce_path != null && job_engi.engi.picture_name != null && job_engi.engi.pictuce_path != "" && job_engi.engi.picture_name != "")
+                    {
+                        <span> <img src="@{@azure}@job_engi.engi.pictuce_path@job_engi.engi.picture_name@key" style="width:100%; height: auto !important;"></span>
+                    }
+                    else
+                    {
+                        <span> <img src="@{@path}assets/images/Engineer_tracking.jpg" style="width:100%; height: auto !important;"></span>
+                    }
+                    <ul>
+                        <li class="show-name">@job_engi.engi.engineer_name</li>
+                        <div class="button-call-cus">
+                            <a href="tel:@(job_engi.engi.tel1 != null ? job_engi.engi.tel1 : job_engi.engi.tel2 != null ? job_engi.engi.tel2 : job_engi.engi.tel3)">
+                                @(job_engi.engi.tel1 != null ? job_engi.engi.tel1 : job_engi.engi.tel2 != null ? job_engi.engi.tel2 : job_engi.engi.tel3)
+                            </a>
+                        </div>
+                        <li class="show-tel">ศูนย์บริการ : @job_engi.phone_office</li>
+                    </ul>
+                </div>
+
+                <div class="button bg-button">
+                    <div class="detail-bottom">
+                        <ul>
+                            <li class="title">ชื่อ - นามสกุล</li>
+                            <li class="don">:</li>
+                            <li class="detail">@job_engi.customer_fullname</li>
+                        </ul>
+                        <ul>
+                            <li class="title">เบอร์โทรศัพท์</li>
+                            <li class="don">:</li>
+                            <li class="detail">@job_engi.customer_mobile</li>
+                        </ul>
+                    </div>
+                    <div class="button-call" onclick="one()">
+                        <a class="bt-next">
+                            แก้ไขที่อยู่
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div id="map"></div>
+            <div id="warnings-panel"></div>
+        </div>
+    </div>
+
+
+    <!-- jQuery -->
+    <script src="@{@path}assets/vendors/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="@{@path}assets/js/bootstrap.min.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=@{@map_key}&libraries=places&callback=initMap"></script>
+    <script>
+        var plustime = @PlusTimeJourney;
+        var base_url = '@{@path}';
+            var c_lati =  @(job_engi.customer_lat == null ? "0" : @job_engi.customer_lat );
+            var c_longti =   @(job_engi.customer_long == null ? "0" : job_engi.customer_long );
+            var c_location = c_lati + "," + c_longti;
+            var e_lati = @(job_engi.engi.lag == null ? "0" : job_engi.engi.lag );
+            var e_longti = @(job_engi.engi.@long == null ? "0" : job_engi.engi.@long );
+            var e_location = e_lati + "," + e_longti;
+        var center = { lat: c_lati, lng: c_longti };
+
+        var lat;
+        var long;
+        var map;
+
+        function back() {
+            document.getElementById("step-three").style.display = "block";
+            document.getElementById("step-two").style.display = "none";
+            initMap();
+            document.getElementById("map").style.display = "block";
+        }
+
+        function two() {
+            document.getElementById("map").style.display = "none";
+            document.getElementById("step-one").style.display = "none";
+            document.getElementById("step-two").style.display = "block";
+        }
+
+        function edit() {
+            var new_lati = map.center.lat();
+            var new_longti = map.center.lng();
+            var order_no = '@job_engi.service_order_no.ToString()';
+            var txt = {
+                order_no: order_no,
+                new_lati: new_lati,
+                new_longti: new_longti,
+            };
+            $.ajax({
+                url: base_url + "t/edit/location",
+                type: "POST",
+                contentType: 'application/json',
+                data: JSON.stringify(txt),
+                success: function () {
+                    location.reload();
+                },
+                error: function () {
+
+                }
+            })
+        }
+
+        function one() {
+            document.getElementById("step-three").style.display = "none";
+            document.getElementById("step-one").style.display = "block";
+            initMap(1);
+        }
+
+        function initMap(page) {
+
+            map = new google.maps.Map(document.getElementById('map'), { zoom: 18, center: center });
+            var trafficLayer = new google.maps.TrafficLayer();
+            trafficLayer.setMap(map);
+            if (page == 1) {
+
+                markerCenter = new google.maps.Marker({
+                    position: map.getCenter(),
+                    map: map
+                });
+                infowindowCenter = new google.maps.InfoWindow;
+                infowindow = new google.maps.InfoWindow;
+                // Try HTML5 geolocation.
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        var pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        map.setCenter(pos);
+                        var geocoder = new google.maps.Geocoder;
+                        var infowindow = new google.maps.InfoWindow;
+                        geocodeLatLng(geocoder, map, infowindow);
+                    }, function (err) {
+                        handleLocationError(true, infowindowCenter, map.getCenter());
+                    });
+                } else {
+                    // Browser doesn't support Geolocation
+                    handleLocationError(false, infowindowCenter, map.getCenter());
+                }
+                markerCenter.setMap(map);
+
+                map.addListener('bounds_changed', function () {
+                     //console.log('bounds_changed');
+                    changePointer();
+                });
+
+                /// SEARCH
+                var input = document.getElementById('pac-input');
+                var searchBox = new google.maps.places.SearchBox(input);
+
+                map.addListener('idle', function () {
+
+                    searchBox.setBounds(map.getBounds());
+                    var geocoder = new google.maps.Geocoder;
+                    var infowindow = new google.maps.InfoWindow;
+                    geocodeLatLng(geocoder, map, infowindow);
+                });
+
+                searchBox.addListener('places_changed', function () {
+
+                    var places = searchBox.getPlaces();
+                    if (places.length == 0) {
+                        return;
+                    }
+                    // deleteMarkers();
+                    map.setCenter(places[0].geometry.location);
+                    var geocoder = new google.maps.Geocoder;
+                    var infowindow = new google.maps.InfoWindow;
+                    geocodeLatLng(geocoder, map, infowindow);
+
+                    document.getElementById('pac-input').value = "";
+                });
+
+            }
+            else {
+                var directionsService = new google.maps.DirectionsService;
+                var directionsDisplay = new google.maps.DirectionsRenderer({ map: map });
+                directionsDisplay.setMap(map);
+                directionsDisplay.setOptions({
+                    suppressMarkers: true,
+                    polylineOptions: {
+                        strokeWeight: 5,
+                        strokeOpacity: 0.8,
+                        strokeColor: '#1428a0'
+                    }
+                });
+                var input = e_location;
+                var latlngStr = input.split(',', 2);
+                var latlng = { lat: parseFloat(latlngStr[0]), lng: parseFloat(latlngStr[1]) };
+                var input2 = c_location;
+                var latlngStr2 = input2.split(',', 2);
+                var latlng2 = { lat: parseFloat(latlngStr2[0]), lng: parseFloat(latlngStr2[1]) };
+
+                var s = @job_engi.status_job;
+                var s_h = @job_engi.appointment_datetime.Value.Hour;
+                var s_m = @job_engi.appointment_datetime.Value.Minute;
+                var e_h = @job_engi.appointment_to_datetime.Value.Hour;
+                var e_m = @job_engi.appointment_to_datetime.Value.Minute;
+
+                s_h = s_h == "0" ? "00" : s_h;
+                s_m = s_m == "0" ? "00" : s_m;
+                e_h = e_h == "0" ? "00" : e_h;
+                e_m = e_m == "0" ? "00" : e_m;
+
+                if (c_longti == "0" || c_lati == "0") {
+                    window.alert('ระบบไม่พบที่อยู่ของลูกค้า ท่านสามารถเลือกที่เมนู แก้ไขที่อยู่ เพื่ออัพเดทข้อมูลที่อยู่');
+                }
+                else if (e_longti != "0" && e_lati != "0" && c_longti != "0" && c_lati != "0" && (s == 3 || s == 7 || s == 8 || s == 10 || s == 11)) {
+                    calculateAndDisplayRoute(directionsDisplay, directionsService, latlng, latlng2, map);
+                }
+                else {
+                    document.getElementById('output').innerHTML = "ช่วงเวลานัดหมายช่าง " + s_h + "." + s_m + " - " + e_h + "." + e_m;
+                    createMarker(latlng, "Start", "@{@path}assets/images/icons/Engineer-blue-non.png");
+                    createMarker(latlng2, "Stop", "@{@path}assets/images/icons/Customer-blue-non.png");
+                }
+            }
+        }
+
+        function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+            infoWindow.setPosition(pos);
+            infoWindow.setContent(browserHasGeolocation ?
+                //'Error: The Geolocation service failed.' :
+                'ระบบไม่พบที่อยู่ของลูกค้า กรุณาเปิด Location เพื่ออัพเดทข้อมูลที่อยู่' :
+                'Error: Your browser doesn\'t support geolocation.');
+            infoWindow.open(map);
+        }
+
+        function changePointer() {
+            lat = map.center.lat();
+            long = map.center.lng();
+            markerCenter.setPosition(map.center);
+        }
+        //function changeMarker(location, content = null) {
+        function changeMarker(location, content) {
+            // var infowindow = new google.maps.InfoWindow;
+            infowindowCenter.setContent(content);
+            infowindowCenter.open(map, markerCenter);
+            $("#location_info").html(content);
+            $("#show_loca").html(content);
+        }
+
+        ///    GEOREVERSE
+        function geocodeLatLng(geocoder, map, infowindow) {
+            geocoder.geocode({ 'location': map.getCenter() }, function (results, status) {
+                if (status === 'OK') {
+                    if (results[0]) {
+                        // deleteMarkers();
+                        changeMarker(map.getCenter(), results[0].formatted_address);
+                        //console.log(results[0].geometry);
+                    } else {
+                        window.alert('No results found');
+                    }
+                } else {
+                    //window.alert('Geocoder failed due to: ' + status);
+                    window.alert('ระบบไม่พบที่อยู่ของลูกค้า กรุณาเปิด Location เพื่ออัพเดทข้อมูลที่อยู่');
+                }
+            });
+        }
+
+        function calculateAndDisplayRoute(directionsDisplay, directionsService, _origin, _destination, map) {
+            createMarker(_origin, "Start", "@{@path}assets/images/icons/Engineer-blue-non.png");
+            createMarker(_destination, "Stop", "@{@path}/assets/images/icons/Customer-blue-non.png");
+
+                directionsService.route({
+                    origin: _origin,
+                    destination: _destination,
+                    travelMode: 'DRIVING',
+                    drivingOptions: {
+                        departureTime: new Date(/* now, or future date */),
+                        trafficModel: 'pessimistic'
+                    },
+                }, function (response, status) {
+                    // Route the directions and pass the response to a function to create
+                    // markers for each step.
+
+                    if (status === 'OK') {
+                        document.getElementById('warnings-panel').innerHTML =
+                            '<b>' + response.routes[0].warnings + '</b>';
+                        directionsDisplay.setDirections(response);
+                        //console.log(response);
+                        //console.log("response ", response.routes[0]);
+                        document.getElementById('output').innerHTML =
+                            'ระยะทาง <b>' + response.routes[0].legs[0].distance.text + '</b>' +
+                            '<b> ' + (parseInt((response.routes[0].legs[0].duration.value / 60).toFixed(0)) + parseInt(plustime)) + " นาที" + '</b>';
+                        //'<b> ' + response.routes[0].legs[0].duration.text + '</b>';
+                    }
+                    //else {
+                    //    window.alert('Directions request failed due to ' + status);
+                    //}
+                });
+        }
+
+        function createMarker(latlng, title, _icon) {
+            var marker = new google.maps.Marker({
+                position: latlng,
+                title: title,
+                icon: _icon,
+                map: map
+            });
+        }
+    </script>
+</body>
+</html>

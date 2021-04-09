@@ -1,0 +1,226 @@
+﻿@using System.Configuration;
+@{
+    /**/
+
+    ViewBag.Title = "index";
+    string path = ConfigurationManager.AppSettings["Base_URL"];
+    var ls_cate = (List<CommonLib.tb_jobsl_category>)ViewData["Cate"];
+}
+
+<div class="content">
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+
+
+
+            <div class="x_panel">
+                <div class="x_title">
+                    <h1>
+                        แบบสอบถามทั้งหมด
+                    </h1>
+                    <div class="x_content table_tools">
+                        <div class="row">
+                            <div class="form-group">
+
+                                @*<div class="search-job">
+                                        <div class="col-sm-2">
+                                            <input type="text" id="txtSearchUser" class="form-control" placeholder="ค้นหาหมายเลขงานหรือชื่อลูกค้า">
+                                        </div>
+                                    </div>*@
+                                <div class="col-md-1 col-sm-4 col-xs-12">
+
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+
+
+
+            <div class="table-tabs">
+                <div class="tab-content">
+
+                    <div class="head-survey custom_font">
+                        <h3>
+                            แบบสอบถามทั่วไป
+                        </h3>
+                    </div>
+                    <table class="table main-table">
+                        <thead>
+                            <tr>
+                                <th>ลำดับ</th>
+                                <th>คำถาม</th>
+                                <th>สถานะ</th>
+
+                                <th>คัดกรอง</th>
+                                <th>อัพเดทล่าสุด</th>
+                                <th>แก้ไข</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyUser">
+                            @foreach (var item in (List<CommonLib.in_survey_question>)ViewData["Survey"])
+                            {
+                                @*<td>@item.create_date.ToString("dd/MM/yyyy")</td>*@
+                            <tr>
+                                <td>
+                                    <p>@item.setorder</p>
+                                </td>
+                                <td style="width:50%">
+                                    <p>@item.question</p>
+                                </td>
+                                <td>@(item.is_enable == 1 ? "เปิดการใช้งาน" : "ปิดการใช้งาน")</td>
+                                <td>@(item.is_check == 1 ? "เปิดการคัดกรอง" : "ปิดการคัดกรอง")</td>
+                                <td>@item.update_date.ToString("dd/MM/yyyy")</td>
+
+                                <td>
+                                    <div class="dropdown">
+                                        <a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="dLabel">
+                                            <li>
+                                                @*<a onclick="edit('@item.id')">*@
+                                                <a href="@(path)survey/add?id=@(item.id)">
+                                                    <span> แก้ไข</span>
+                                                </a>
+                                            </li>
+
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="clearfix"></div>
+
+                </div>
+            </div>
+
+
+
+
+
+            <div class="table-tabs">
+                <div class="tab-content">
+
+
+                    <div class="head-survey">
+                        <h3>
+                            แบบสอบถามตามประเภทสินค้า
+                        </h3>
+                    </div>
+                    <div class="col-sm-2">
+                        <select id="cate" class="form-control" onchange="select_cate()">
+                            @*<option value="0">เลือก</option>*@
+                            @foreach (var cate in ls_cate)
+                            {
+                                if (ls_cate[0].id == cate.id)
+                                {
+                                    <option value="@cate.id" selected>@cate.name</option>
+                                }
+                                else
+                                {
+                                    <option value="@cate.id">@cate.name</option>
+                                }
+
+                            }
+
+                        </select>
+                    </div>
+
+
+
+                    <table class="table main-table">
+                        <thead>
+                            <tr>
+                                <th>ลำดับ</th>
+                                <th>คำถาม</th>
+                                <th>สถานะ</th>
+
+                                <th>คัดกรอง</th>
+                                <th>อัพเดทล่าสุด</th>
+                                <th>แก้ไข</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyUser">
+                            @foreach (var item in (List<CommonLib.in_survey_question>)ViewData["Survey_cate"])
+                            {
+                                @*<td>@item.create_date.ToString("dd/MM/yyyy")</td>*@
+                                <tr>
+                                    <td>
+                                        <p>@item.setorder</p>
+                                    </td>
+                                    <td style="width:50%">
+                                        <p>@item.question</p>
+                                    </td>
+                                    <td>@(item.is_enable == 1 ? "เปิดการใช้งาน" : "ปิดการใช้งาน")</td>
+                                    <td>@(item.is_check == 1 ? "เปิดการคัดกรอง" : "ปิดการคัดกรอง")</td>
+                                    <td>@item.update_date.ToString("dd/MM/yyyy")</td>
+
+                                    <td>
+                                        <div class="dropdown">
+                                            <a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                                            </a>
+                                            <ul class="dropdown-menu" aria-labelledby="dLabel">
+                                                <li>
+                                                    <a onclick="edit('@item.id')">
+                                                        <span> แก้ไข</span>
+                                                    </a>
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+
+                    <div class="clearfix"></div>
+
+                </div>
+            </div>
+
+
+
+
+
+
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+
+    <script>
+        var base_url = '@(path)'
+
+        $(document).ready(function () {
+            let para = "@Request.QueryString["cate"]";
+            if (para != "") {
+                $('#cate').val(para)
+                $('#cate').focus()
+            }
+
+        });
+
+        function edit(id) {
+            window.location.href = base_url + "survey/add?id=" + id;
+        }
+
+        function select_cate() {
+            window.location.href = base_url + "survey?cate=" + $('#cate').val();
+        }
+
+
+    </script>
+}

@@ -1,0 +1,264 @@
+﻿@using System.Configuration;
+@{
+    ViewBag.Title = "Add";
+    string path = ConfigurationManager.AppSettings["Base_URL"];
+    var quest = (CommonLib.in_survey_question)ViewData["quest"];
+    
+}
+
+<input type="hidden" id="q_id" value="@quest.id" />
+
+<div class="content">
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h1>
+                        แก้ไขคำถามแบบสอบถาม
+                    </h1>
+                    <div class="form-tools">
+                        <a href="@{@path}survey" class="back-btn">
+                            กลับ
+                        </a>
+                        <a onclick="btn_save()" class="exitsave-btn">
+                            บันทึกและออก
+                        </a>
+
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+
+            <div class="x_panel form">
+                <span class="section">คำถามแบบสอบถาม</span>
+                <div id="demo-form2" class="form-horizontal form-label-left" novalidate="">
+
+                    <div class="form-group warning">
+                        <label class="control-label col-md-2 col-sm-2 col-xs-12" for="first-name">
+                            เปิดใช้งาน
+                        </label>
+                        <div class="col-md-4 col-sm-4 col-xs-12">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" @(quest.is_enable == 1 ? "checked" : "") id="is_enable">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-2 col-sm-2 col-xs-12" for="first-name">
+                            คำถาม
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <input class="form-control" required="required" value="@(quest.question)" id="quest" />
+                        </div>
+                    </div>
+
+                    @*<div class="form-group">
+                            <label class="control-label col-md-2 col-sm-2 col-xs-12">ลำดับ</label>
+                            <div class="col-md-4 col-sm-4 col-xs-12">
+                                <select id="order" class="form-control" >
+                                    <option value="0">สามารถ</option>
+                                </select>
+                            </div>
+                        </div>*@
+                </div>
+
+                <span class="section">ตั้งค่าการกรองแบบสอบถามเชิงลบ</span>
+                <div id="demo-form2" class="form-horizontal form-label-left" novalidate="">
+
+                    <div class="form-group">
+                        <label class="control-label col-md-2 col-sm-2 col-xs-12" for="first-name">
+                            เปิดการคัดกรอง
+                        </label>
+                        <div class="col-md-4 col-sm-4 col-xs-12">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" id="is_check" @(quest.is_check == 1 ? "checked" : "")>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="control-label col-md-2 col-sm-2 col-xs-12" for="first-name">
+                            คะแนนขั้นต่ำ
+                        </label>
+                        <div class="col-md-4 col-sm-4 col-xs-12">
+                            <input type="number" id="min" class="form-control" value="@(quest.check_source_min != null ? quest.check_source_min : 0)">
+                        </div>
+                        <label class="control-label col-md-2 col-sm-2 col-xs-12" for="first-name">
+                            คะแนน
+                        </label>
+
+                        <div class="form-group">
+                            <label class="control-label col-md-12 col-sm-12 col-xs-12" for="first-name">
+                                ระบบจะทำการประมวลผลหลังจากที่มีการส่งข้อมูลเข้าระบบ และจะส่งอีเมล์ไปยัง ศูนย์บริการที่รับมอบหมายงาน.( อีเมล์ที่ถูกตั้งค่าไว้ในระบบ )
+                            </label>
+                        </div>
+
+                    </div>
+
+
+
+                    <span class="section">รูปแบบคำตอบ</span>
+                    <div id="demo-form2" class="form-horizontal form-label-left" novalidate="">
+
+
+                        <div class="form-group">
+                            <label class="control-label col-md-12 col-sm-12 col-xs-12" for="first-name">
+                                คำตอบกรุณาเรียงจากคะแนน น้อย ไปมาก เพื่อให้สอดคล้องกับหน้าแสดงผลบน android
+                            </label>
+             
+                        </div>
+                        
+
+                        <table class="table main-table">
+                            <thead>
+                                <tr>
+                                    <th>เปิดใช้งาน</th>
+                                    <th>คำตอบ (สำหรับแสดงผล)</th>
+                                    <th>คะแนน (ของคำตอบ)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyUser">
+                                @foreach (var item in (List<CommonLib.in_survey_answer>)ViewData["answer"])
+                                {
+                                    <input type="hidden" name="ans_id" value="@item.id" />
+                                    <tr>
+                                        <td>
+                                            <input name="cb" type="checkbox" @(item.is_enable == 1 ? "checked" : "") />
+                                        </td>
+                                        <td>
+                                            <input class="form-control" name="answer" type="text" value="@item.answer" />
+                                        </td>
+                                        <td>
+                                            <input class="form-control" name="score" type="number" value="@item.answer_source" />
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+
+
+                </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+
+    <script>
+
+       
+        $(document).ready(function () {
+           
+        });
+
+        function btn_save() {
+
+            let cb = $('input[name="cb"]')
+            let count_cb = cb.length;
+            let ls_cb = []
+            for (let i = 0; i < count_cb; i++) {
+                ls_cb.push(cb[i].checked)
+            }
+
+            let answer = $('input[name="answer"]')
+            let count_answer = answer.length;
+            let ls_answer = []
+            for (let i = 0; i < count_answer ; i++) {
+                ls_answer.push(answer[i].value)
+            }
+
+            let score = $('input[name="score"]')
+            let count_score = score.length;
+            let ls_score = []
+            for (let i = 0; i < count_score; i++) {
+                ls_score.push(score[i].value)
+            }             
+
+            let ans_id = $('input[name="ans_id"]')
+            let count_ans_id = ans_id.length;
+            let ls_ans_id = []
+            for (let i = 0; i < count_ans_id; i++) {
+                ls_ans_id.push(ans_id[i].value)
+            }   
+
+            if ($('#min').val() == null || $('#min').val() == "") {
+                $('#min').val(0)
+            }
+
+     
+            var body = {
+                q_id: $('#q_id').val(),
+                is_enable: $('#is_enable').is(":checked"),
+                quest: $('#quest').val(),
+                is_check: $('#is_check').is(":checked"),
+                min: $('#min').val(),
+                ls_cb: ls_cb,
+                ls_answer: ls_answer,
+                ls_score: ls_score,
+                ls_ans_id: ls_ans_id,
+            }
+
+            //var form = new FormData();
+            //form.append('q_id', $('#q_id').val());
+            //form.append('is_enable', $('#is_enable').is(":checked"));
+            //form.append('quest', $('#quest').val());
+            //form.append('is_check', $('#is_check').is(":checked"));
+            //form.append('min', $('#min').val());
+            //form.append('ls_cb', ls_cb);
+            //form.append('ls_answer', ls_answer);
+            //form.append('ls_score', ls_score);
+            //form.append('ls_ans_id', ls_ans_id);
+
+            $.ajax({
+                url: base_url + "survey/SaveQnA",
+
+                //contentType: false,
+                //processData: false,
+                //data: form,
+
+                data: JSON.stringify(body),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+
+                type: "POST",   
+                success: function (val) {
+           
+                    if (val.result == true) {
+
+                        new PNotify({
+                            title: "บันทึกสำเร็จแล้ว",
+                            delay: 100,
+                            type: "success",
+                            styling: 'bootstrap3'
+                        });
+
+                        window.location.replace("@{@path}survey/index");
+                    }
+                    else {
+                        //handle fail
+                    }
+                },
+                error: function (err) {
+                    console.log(err)
+                }
+            })
+            
+
+        }
+
+        
+    </script>
+
+
+}

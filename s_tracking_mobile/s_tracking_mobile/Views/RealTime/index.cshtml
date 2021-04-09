@@ -1,0 +1,1704 @@
+﻿@using System.Configuration;
+@{
+    ViewBag.Title = "RealTime";
+    var count = (List<s_tracking_mobile.Models.countJob>)ViewData["Count-Job"];
+    var path = ViewData["Current_Path"].ToString();
+    var googleMap_url = ConfigurationManager.AppSettings["googleMap_key"];
+
+
+
+    //var test = @Html.Raw(WebUtility.HtmlDecode((ViewData["DataDecode"]).ToString()));
+
+    var pagination = ViewData["pagination"];
+}
+
+<div class="content">
+    <div class="row">
+        <!--NEW-->
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h1>
+                        ตารางงานในขณะนี้
+                        <br>
+                        @{
+                            var day = DateTime.Today;
+                            <span id="topic_day"></span>
+                            <span id="text_update_date"></span>
+                        }
+                    </h1>
+
+                    <div class="x_selectdate">
+                        <div class="show_date" onclick="click_date(0)">
+                            วันนี้
+                        </div>
+                        <div class="date_nav">
+                            <ul>
+                                <li>
+                                    <a onclick="click_date(1)">
+                                        <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a onclick="click_date(2)">
+                                        <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content table_tools">
+                    <div class="row">
+                        <div class="form-group">
+                            <div class="search-job">
+                                <div class="col-sm-3">
+                                    <input type="text" id="txtSearchJob" class="form-control" placeholder="ค้นหาจากหมายเลขงาน/หมายเลขช่าง">
+                                </div>
+                            </div>
+                            <div class="col-md-1 col-sm-4 col-xs-12">
+                                <select class="form-control" id="selectEngineer">
+                                    <option value="0">ทุกช่าง</option>
+                                    @if (ViewBag.id_store != 0)
+                                    {
+                                        foreach (var item in ((List<s_tracking_mobile.Models.getEngineer>)ViewData["all_Engineer"]).Where(w => w.site_id == ViewBag.id_store))
+                                        {
+                                            <option value="@item.id">@item.name</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        foreach (var item in (List<s_tracking_mobile.Models.getEngineer>)ViewData["all_Engineer"])
+                                        {
+                                            <option value="@item.id">@item.name</option>
+                                        }
+                                    }
+
+                                </select>
+                            </div>
+                            <div class="filter-job">
+                                <div class="col-sm-2">
+                                    @{
+                                        var start_date = DateTime.Today;
+                                        <input type="text" value="@start_date.ToString("dd/MM/yyyy")" class="form-control start-date-input" placeholder="วันที่เริ่มงาน" id="single_cal2">
+                                    }
+                                </div>
+                                <div class="col-sm-2">
+                                    @{
+                                        var end_date = DateTime.Today;
+                                        <input type="text" value="@end_date.ToString("dd/MM/yyyy")" class="form-control end-date-input" placeholder="วันที่จบงาน" id="single_cal3">
+                                    }
+                                </div>
+                                <div class="col-sm-1">
+                                    <a onclick="btn_search()" class="tableview">
+                                        ค้นหา
+                                    </a>
+                                </div>
+                                <div class="col-sm-2">
+                                    <a onclick="map_realtime()" class="mapview">
+                                        <span>รูปแบบแผนที่</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-tabs">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist" id="tab_status">
+                    <li role="presentation" id="liHome" class="active" data-tab="0">
+                        <a href="#home" onclick="click_status(0)" id="home-tab" aria-controls="home" role="tab" data-toggle="tab">
+                            <span id="count_all_job">
+                                @count[0].all_job
+                            </span>
+                            งานทั้งหมด
+                        </a>
+                    </li>
+                    <li role="presentation" id="liRepair" data-tab="1">
+                        <a href="#proceed" onclick="click_status(1)" id="profile-tab" aria-controls="proceed" role="tab" data-toggle="tab">
+                            <span id="count_repair">
+                                @count[0].repair
+                            </span>
+                            งานซ่อม
+                        </a>
+                    </li>
+                    <li role="presentation" id="liPending" data-tab="2">
+                        <a href="#pending" onclick="click_status(2)" id="profile-tab2" aria-controls="pending" role="tab" data-toggle="tab">
+                            <span id="count_pending">
+                                @count[0].pending
+                            </span>
+                            งานที่เลื่อนเข้าบริการ
+                        </a>
+                    </li>
+                    <li role="presentation" id="liDelay" data-tab="6">
+                        <a href="#delayjob" onclick="click_status(6)" id="profile-tab3" aria-controls="delayjob" role="tab" data-toggle="tab">
+                            <span id="count_delay_job">
+                                @count[0].delay_job
+                            </span>
+                            งานล่าช้า
+                        </a>
+                    </li>
+                    <li role="presentation" id="liFin" data-tab="3">
+                        <a href="#finished" onclick="click_status(3)" id="profile-tab4" aria-controls="finished" role="tab" data-toggle="tab">
+                            <span id="count_completed">
+                                @count[0].completed
+                            </span>
+                            งานที่เสร็จสิ้น
+                        </a>
+                    </li>
+                    <li role="presentation" id="liCancel" data-tab="4">
+                        <a href="#cancel" onclick="click_status(4)" id="profile-tab6" aria-controls="cancel" role="tab" data-toggle="tab">
+                            <span id="count_cancel">
+                                @count[0].cancel
+                            </span>
+                            ยกเลิก
+                        </a>
+                    </li>
+                </ul>
+                <!-- /Nav tabs -->
+                <!-- Tab panes -->
+                <div class="tab-content" id="tab_body_realtime">
+                    <div role="tabpanel" class="tab-pane fade active in" id="home">
+                        <div class="table-view active">
+                            <table class="table main-table">
+                                <thead>
+                                    <tr>
+                                        <th>ชื่อศูนย์บริการ</th>
+                                        <th>จังหวัด</th>
+                                        <th>งานทั้งหมด</th>
+                                        <th>ชื่อผู้ติดต่อ</th>
+                                        <th>หมายเลขโทรศัพท์</th>
+                                        <th>เวลาเปิด - ปิด</th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody_alljob">
+                                    @{int count_realtime = 0;}
+                                    @foreach (var item in (List<s_tracking_mobile.Models.realtime>)ViewData["Data"])
+                                    {
+                                        int count_job = 1;
+                                        var style_site_css = item.count_jobDelay > 0 ? "delay" : "";
+                                        var style_open = count_realtime == 0 ? "open" : "";
+                                        <tr class="jobc-status @style_site_css">
+                                            <td>
+                                                @item.store_name
+                                                @if (item.count_jobDelay > 0)
+                                                {
+                                                    <br>
+                                                    <span class="date-status">
+                                                        งานล่าช้า (@item.count_jobDelay)
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @item.store_province
+                                            </td>
+                                            <td>
+                                                @item.all_job
+                                            </td>
+                                            <td>
+                                                @item.store_contact
+                                            </td>
+                                            <td>
+                                                @item.store_tel
+                                            </td>
+                                            <td class="open-hour">
+                                                <p>@(item.store_date_open1 == "0" || item.store_date_open1 == null ? "" : item.store_date_open1) @(item.store_to_date_open1 == "0" || item.store_to_date_open1 == null ? "" : item.store_to_date_open1) @(item.store_time_open1 == "0" || item.store_time_open1 == null ? "" : item.store_time_open1) @(item.store_to_time_open1 == "0" || item.store_to_time_open1 == null ? "" : " - " + item.store_to_time_open1)</p>
+                                                <p>@(item.store_date_open2 == "0" || item.store_date_open2 == null ? "" : item.store_date_open2) @(item.store_to_date_open2 == "0" || item.store_to_date_open2 == null ? "" : item.store_to_date_open2) @(item.store_time_open2 == "0" || item.store_time_open2 == null ? "" : item.store_time_open2) @(item.store_to_time_open2 == "0" || item.store_to_time_open2 == null ? "" : " - " + item.store_to_time_open2)</p>
+                                                <p>Closed @(item.store_close == "0" || item.store_close == null ? " - " : item.store_close)</p>
+                                            </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                                                    </a>
+                                                    <ul class="dropdown-menu" aria-labelledby="dLabel">
+                                                        <li>
+                                                            <a href="@{@path}site/edit?id=@item.store_guid">แก้ไข</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                            <td class="toggle-table-child">
+
+                                                <a class="@style_open" href="">
+                                                    <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr class="minor-table" id="@count_realtime">
+                                            <td colspan="9" style="padding: 0;">
+                                                <div class="minor-wrap">
+                                                    <table class="table table-striped">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>ลำดับ</th>
+                                                                <th>หมายเลขงาน</th>
+                                                                <th>ชื่อช่าง</th>
+                                                                <th>สถานะงาน</th>
+                                                                <th>รายชื่อลูกค้า</th>
+                                                                <th>หมายเลขช่าง</th>
+                                                                <th>ช่วงเวลาที่ช่างเข้าซ่อม</th>
+                                                                <th></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @if (item.jobs != null)
+                                                            {
+                                                                foreach (var item2 in item.jobs)
+                                                                {
+                                                                    var style_status = item2.job_status == "Job_Delay" ? "delay" : "";
+                                                                    var style_status2 = item2.job_status == "Assigned" || item2.job_status == "Engineer_Assigned" ? "proceed"
+                                                                                       : item2.job_status == "Pending" || item2.job_status == "Job_Delay" || item2.job_status == "Overtime" || item2.job_status == "Start_job" || item2.job_status == "Start_Repair" || item2.job_status == "LongTimeJourney" ? "pending"
+                                                                                       : item2.job_status == "Completed" ? "finished"
+                                                                                       : item2.job_status == "Cancel" ? "cancel" : "";
+
+                                                                    <tr class="jobc-status @style_status">
+                                                                        <td>
+                                                                            @(count_realtime + 1)-@count_job
+                                                                        </td>
+                                                                        <td>
+                                                                            @item2.job_number
+                                                                            @if (item2.job_status == "Job_Delay")
+                                                                            {
+                                                                                var text_status2 = item2.job_status == "Job_Delay" ? " งานล่าช้า"
+                                                                                                    : item2.job_status == "Overtime" ? " ซ่อมล่าช้า" : " เดินทาง";
+                                                                                <br />
+                                                                                <span class="date-status">
+                                                                                    @text_status2
+                                                                                </span>
+                                                                            }
+                                                                        </td>
+                                                                        <td>
+                                                                            @item2.en_name
+                                                                        </td>
+                                                                        <td class="job-status @style_status2">
+                                                                            @{
+                                                                                var text_status = item2.job_status.Replace("_", " ");
+                                                                                <span>@text_status</span>
+                                                                            }
+                                                                        </td>
+                                                                        <td>
+                                                                            @item2.customer_name
+                                                                        </td>
+                                                                        <td>
+                                                                            @item2.en_code
+                                                                        </td>
+                                                                        <td>
+                                                                            @{
+                                                                                var time1 = item2.app_time != null ? item2.app_time.Value.ToString("HH:mm") : "";
+                                                                                var date1 = item2.app_time != null ? item2.app_time.Value.ToString("dd/MMM/yyyy") : "กรุณาตั้งเวลา";
+                                                                                var time2 = item2.app_to_time != null ? item2.app_to_time.Value.ToString("HH:mm") : "";
+                                                                                <p>@Html.Raw(date1) @Html.Raw(time1) @(Html.Raw(time2))</p>
+                                                                            }
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="dropdown">
+                                                                                <a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                    <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                                                                                </a>
+                                                                                <ul class="dropdown-menu" aria-labelledby="dLabel">
+                                                                                    <li>
+                                                                                        <a href="@{@path}job/edit?id=@item2.job_guid">แก้ไข</a>
+                                                                                    </li>
+
+                                                                                    <li>
+                                                                                        <a href="">ลบข้อมูล</a>
+                                                                                    </li>
+
+                                                                                </ul>
+
+                                                                            </div>
+
+                                                                        </td>
+
+                                                                    </tr>
+                                                                    count_job++;
+                                                                }
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                
+                                            </td>
+                                        </tr>
+                                        count_realtime++;
+                                    }
+                                </tbody>
+                            </table>
+
+                            <div class="clearfix"></div>
+
+                            <nav aria-label="Page navigation">
+                                <ul id="pagination_alljob" class="pagination"></ul>
+                            </nav>
+                        </div>
+                        <div class="clearfix"></div>
+
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="proceed">
+                        <table class="table main-table">
+                            <thead>
+                                <tr>
+                                    <th>ชื่อศูนย์บริการ</th>
+                                    <th>จังหวัด</th>
+                                    <th>งานทั้งหมด</th>
+                                    <th>ชื่อผู้ติดต่อ</th>
+                                    <th>หมายเลขโทรศัพท์</th>
+                                    <th>เวลาเปิด - ปิด</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody_repair"></tbody>
+                        </table>
+
+                        <div class="clearfix"></div>
+
+                        <nav aria-label="Page navigation">
+                            <ul id="pagination_repair" class="pagination"></ul>
+                        </nav>
+
+                        <div class="clearfix"></div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="pending">
+                        <table class="table main-table">
+                            <thead>
+                                <tr>
+                                    <th>ชื่อศูนย์บริการ</th>
+                                    <th>จังหวัด</th>
+                                    <th>งานทั้งหมด</th>
+                                    <th>ชื่อผู้ติดต่อ</th>
+                                    <th>หมายเลขโทรศัพท์</th>
+                                    <th>เวลาเปิด - ปิด</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody_pending"></tbody>
+                        </table>
+
+                        <div class="clearfix"></div>
+
+                        <nav aria-label="Page navigation">
+                            <ul id="pagination_pending" class="pagination"></ul>
+                        </nav>
+
+                        <div class="clearfix"></div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="delayjob">
+                        <table class="table main-table">
+                            <thead>
+                                <tr>
+                                    <th>ชื่อศูนย์บริการ</th>
+                                    <th>จังหวัด</th>
+                                    <th>งานทั้งหมด</th>
+                                    <th>ชื่อผู้ติดต่อ</th>
+                                    <th>หมายเลขโทรศัพท์</th>
+                                    <th>เวลาเปิด - ปิด</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody_delayjob"></tbody>
+                        </table>
+
+                        <div class="clearfix"></div>
+
+                        <nav aria-label="Page navigation">
+                            <ul id="pagination_delayjob" class="pagination"></ul>
+                        </nav>
+
+                        <div class="clearfix"></div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="finished">
+                        <table class="table main-table">
+                            <thead>
+                                <tr>
+                                    <th>ชื่อศูนย์บริการ</th>
+                                    <th>จังหวัด</th>
+                                    <th>งานทั้งหมด</th>
+                                    <th>ชื่อผู้ติดต่อ</th>
+                                    <th>หมายเลขโทรศัพท์</th>
+                                    <th>เวลาเปิด - ปิด</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody_completed"></tbody>
+                        </table>
+
+                        <div class="clearfix"></div>
+
+                        <nav aria-label="Page navigation">
+                            <ul id="pagination_completed" class="pagination"></ul>
+                        </nav>
+
+                        <div class="clearfix"></div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="cancel">
+                        <table class="table main-table">
+                            <thead>
+                                <tr>
+                                    <th>ชื่อศูนย์บริการ</th>
+                                    <th>จังหวัด</th>
+                                    <th>งานทั้งหมด</th>
+                                    <th>ชื่อผู้ติดต่อ</th>
+                                    <th>หมายเลขโทรศัพท์</th>
+                                    <th>เวลาเปิด - ปิด</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody_cancel"></tbody>
+                        </table>
+
+                        <div class="clearfix"></div>
+
+                        <nav aria-label="Page navigation">
+                            <ul id="pagination_cancel" class="pagination"></ul>
+                        </nav>
+
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <!--MAP-->
+                <div class="map-view">
+                    <div class="">
+                        <div id="map"></div>
+                        <div class="job-info" id="dialog_right">
+
+                        </div>
+                    </div>
+                </div>
+
+                <!--/MAP-->
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    #map {
+        height: 800px; /* The height is 400 pixels */
+        width: 100%; /* The width is the width of the web page */
+    }
+
+    .text-label-marker {
+        width: 50px;
+        height: 20px;
+        border: 1px solid #eb3a44;
+        border-radius: 5px;
+        background: #fee1d7;
+        text-align: center;
+        line-height: 20px;
+        font-weight: bold;
+        font-size: 14px;
+        color: #eb3a44;
+    }
+</style>
+@section header {
+
+}
+@section scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=@{@googleMap_url}">
+    </script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <script>
+        var base_url = '@{@path}';
+        var monthNames2 = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]; // 0 = Jan
+        var date = new Date();
+        var tomorrow = new Date(date)
+        var temData;
+        var temDataMap;
+        var check_first = true;
+        var engineer_first = true;
+        var table = true;
+        var saveEn = [];
+        var data_click_status = null;
+        $(document).ready(function () {
+            //select_engineer(true)
+            @*pagination(@count[0].all_job, 1, "#pagination_alljob");
+            pagination(@count[0].repair, 1, "#pagination_repair");
+            pagination(@count[0].pending, 1, "#pagination_pending");
+            pagination(@count[0].next_job, 1, "#pagination_delayjob");
+            pagination(@count[0].completed, 1, "#pagination_completed");*@
+            @*pagination(@count.waiting, 1, "#pagination_waiting");*@
+            @*pagination(@count[0].cancel, 1, "#pagination_cancel");*@
+
+            pagination(@pagination, 1, "#pagination_alljob");
+
+            if (@count_realtime >= 1) $("#0").removeClass('collaped');
+            formatDate(true, 0);
+
+            setInterval(function () {
+                var check = $('a.mapview').hasClass('active')
+
+                //if (!check) {
+                if (table) {
+                    $("#text_update_date").html("");
+                    var s_start_date = document.getElementById('single_cal2').value;
+                    var s_end_date = document.getElementById('single_cal3').value;
+                    var job_number = document.getElementById('txtSearchJob').value;
+                    setData(s_start_date, s_end_date, job_number);
+
+                    s_start_date == s_end_date ? formatDate(true, s_start_date ) : formatDate(false);
+
+                    var date = new Date()
+                    var text = "อัพเดตข้อมูลล่าสุด " + date.getDate() + "/" + date.getMonth() + "/" + date.getFullYear() + " " + (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":" + (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes());
+
+                    $("#text_update_date").append(text);
+                }
+            }, 120000);
+        });
+
+        //map
+        function map_realtime(pass_status) {
+            var job_number = document.getElementById('txtSearchJob').value;
+            var status = $('ul#tab_status').find('li.active').data('tab');
+            var s_start_date = document.getElementById('single_cal2').value;
+            var s_end_date = document.getElementById('single_cal3').value;
+
+            var moment_start = moment(s_start_date, "DD/MM/YYYY");
+            var moment_end = moment(s_end_date, "DD/MM/YYYY");
+
+            var start_date = new Date(moment_start);
+            var end_date = new Date(moment_end);
+            var Difference_In_Time = end_date.getDate() - start_date.getDate();
+
+            if (Difference_In_Time <= 7) {
+                status = _.isUndefined(pass_status) ? status : pass_status
+                var engineer = document.getElementById('selectEngineer').value;
+                job_number = job_number.toString().trim();
+                table = table == true ? false : true;
+                var check = $('a.mapview').hasClass('active')
+                if (check) {
+                    $('#home').addClass('active in');
+                    $("ul#tab_status").find('li').removeClass('active');
+                    $("ul#tab_status li").first().addClass('active');
+                    //$('#proceed').removeClass('active in'); $('#pending').removeClass('active in'); $('#delayjob').removeClass('active in'); $('#finished').removeClass('active in'); $('#cancel').removeClass('active in');
+                    setData(s_start_date, s_end_date, job_number);
+                } else {
+                    formatDate(false);
+                    $.get(base_url + "realtime/Count_job", { s_start_date: s_start_date, s_end_date: s_end_date, first: false, job_number: job_number, engineer: engineer }, function (obj) {
+
+                        //set count job
+                        document.getElementById('count_all_job').innerHTML = obj[0].all_job;
+                        document.getElementById('count_repair').innerHTML = obj[0].repair;
+                        document.getElementById('count_pending').innerHTML = obj[0].pending;
+                        document.getElementById('count_delay_job').innerHTML = obj[0].delay_job;
+                        document.getElementById('count_completed').innerHTML = obj[0].completed;
+                        document.getElementById('count_cancel').innerHTML = obj[0].cancel;
+                    });
+                    $.get(base_url + "realtime/DataMap", { s_start_date: s_start_date, s_end_date: s_end_date, status: 0, job_number: job_number, engineer: engineer }, function (res) {
+                        initMap(res, status)
+                    });
+                }
+            } else {
+                alert("ค้นหาข้อมูลได้ไม่เกิน 7 วัน");
+            }
+        }
+
+        function initMap(res, status) {
+            $("ul#tab_status").find('li').removeClass('active');
+            switch (status) {
+                case 0:
+                    $("#liHome").addClass('active');
+                    break;
+                case 1:
+                    $("#liRepair").addClass('active');
+                    break;
+                case 2:
+                    $("#liPending").addClass('active');
+                    break;
+                case 6:
+                    $("#liDelay").addClass('active');
+                    break;
+                case 3:
+                    $("#liFin").addClass('active');
+                    break;
+                case 4:
+                    $("#liCancel").addClass('active');
+                    break;
+            }
+
+            //$("ul#tab_status li").first().addClass('active');
+            $('#proceed').removeClass('active in'); $('#pending').removeClass('active in'); $('#delayjob').removeClass('active in'); $('#finished').removeClass('active in'); $('#cancel').removeClass('active in');
+
+            temDataMap = [];
+            temDataMap = res;
+            //console.log('tem',res)
+            var string = "";
+            var saveData = [];
+
+            var date = document.getElementById('topic_day').innerHTML;
+            var marker = [];
+            saveEn = [];
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 13.847860, lng: 100.604274 },
+                zoom: 11
+            });
+            if (!_.isUndefined(res) && res.length > 0 && res[0].engineer != null) {
+
+                var icon_en = "";
+                var icon_cus = "";
+
+                switch (status) {
+                    case 0:
+                        //icon_en = base_url + "assets/images/icons/v2/Engineer-blue-non.png";
+                        icon_cus = base_url + "assets/images/icons/v2/Customer-blue-non.png";
+                        string = "Completed,Cancel,Engineer_Assigned,Start_job,Start_Repair,Job_Delay,Overtime,LongTimeJourney,Pending";
+                        break;
+                    case 1:
+                        //icon_en = base_url + "assets/images/icons/v2/Engineer-orange-non.png";
+                        icon_cus = base_url + "assets/images/icons/v2/Customer-orange-non.png";
+                        string = "Engineer_Assigned,Start_job,Start_Repair,Job_Delay,Overtime,LongTimeJourney";
+                        break;
+                    case 2:
+                        //icon_en = base_url + "assets/images/icons/v2/Engineer-yellow-non.png";
+                        icon_cus = base_url + "assets/images/icons/v2/Customer-yellow-non.png";
+                        string = "Pending";
+                        break;
+                    case 6:
+                        //icon_en = base_url + "assets/images/icons/v2/Engineer-lightblue-non.png";
+                        icon_cus = base_url + "assets/images/icons/v2/Customer-lightblue-non.png";
+                        string = "Job_Delay,Overtime,LongTimeJourney";
+                        break;
+                    case 3:
+                       // icon_en = base_url + "assets/images/icons/v2/Engineer-green-non.png";
+                        icon_cus = base_url + "assets/images/icons/v2/Customer-green-non.png";
+                        string = "Completed";
+                        break;
+                    case 4:
+                        //icon_en = base_url + "assets/images/icons/v2/Engineer-red-non.png";
+                        icon_cus = base_url + "assets/images/icons/v2/Customer-red-non.png";
+                        string = "Cancel";
+                        break;
+                }
+                $.each(res, function (index, obj) {
+                    if (obj.engineer != null) {
+                        var count_job = 1;
+                        var counu_job_en;
+                        $.each(obj.engineer, function (idx, val) {
+                            saveData = [];
+                            icon_en = "";
+                            var job_id_en = "";
+                            var index_en = 1;
+                            for (var i = 0; i < val.jobs.length; i++) {
+                                if (string.includes(val.jobs[i].job_status)) {
+                                    saveData.push(val.jobs[i]);
+                                }
+                                var status2 = val.jobs[i].job_status_int;
+                                var job_number = val.jobs[i].job_number.toString();
+                                if (icon_en == "") {
+                                    if (status2 == 3) {
+                                        icon_en = base_url + "assets/images/icons/v2/Engineer-green-non.png";
+                                        job_id_en = job_number;
+                                    } else if (status2 == 4) {
+                                        icon_en = base_url + "assets/images/icons/v2/Engineer-red-non.png";
+                                        job_id_en = job_number;
+                                    } else if (status2 == 0 || status2 == 6) {
+                                        icon_en = base_url + "assets/images/icons/v2/Engineer-blue-non.png";
+                                        job_id_en = job_number;
+                                    } else if (status2 == 2) {
+                                        icon_en = base_url + "assets/images/icons/v2/Engineer-yellow-non.png";
+                                        job_id_en = job_number;
+                                    } else if (status2 == 7 || status2 == 8 ) {
+                                        icon_en = base_url + "assets/images/icons/v2/Engineer-orange-non.png";
+                                        job_id_en = job_number;
+                                    } else if (status2 == 9 || status2 == 10 || status2 == 11) {
+                                        icon_en = base_url + "assets/images/icons/v2/Engineer-lightblue-non.png";
+                                        job_id_en = job_number;
+                                    }
+                                }
+                                if (icon_en == "" || icon_en == (base_url + "assets/images/icons/v2/Engineer-green-non.png") || icon_en == (base_url + "assets/images/icons/v2/Engineer-red-non.png")) {
+                                    if (i < (val.jobs.length - 1)) {
+                                        status2 = val.jobs[i + 1].job_status_int;
+                                        var get_job_id = val.jobs[i + 1].job_number.toString();
+                                        if (status2 == 3) {
+                                            icon_en = base_url + "assets/images/icons/v2/Engineer-green-non.png";
+                                            job_id_en = get_job_id;
+                                        } else if (status2 == 4) {
+                                            icon_en = base_url + "assets/images/icons/v2/Engineer-red-non.png";
+                                            job_id_en = get_job_id;
+                                        } else if (status2 == 0 || status2 == 6) {
+                                            icon_en = base_url + "assets/images/icons/v2/Engineer-blue-non.png";
+                                            job_id_en = get_job_id;
+                                        } else if (status2 == 2) {
+                                            icon_en = base_url + "assets/images/icons/v2/Engineer-yellow-non.png";
+                                            job_id_en = get_job_id;
+                                        } else if (status2 == 7 || status2 == 8 ) {
+                                            icon_en = base_url + "assets/images/icons/v2/Engineer-orange-non.png";
+                                            job_id_en = get_job_id;
+                                        } else if (status2 == 9 || status2 == 10 || status2 == 11) {
+                                            icon_en = base_url + "assets/images/icons/v2/Engineer-lightblue-non.png";
+                                            job_id_en = get_job_id;
+                                        }
+                                    }
+                                }
+                            }
+                            if (saveData.length > 0) {
+                                counu_job_en = 0;
+                               
+                                $.each(saveData, function (idx2, val2) {
+                                   
+
+                                    switch (val2.job_status) {
+                                        case "Assigned": icon_cus = base_url + "assets/images/icons/v2/Customer-blue-non.png"; break;
+                                        case "Pending": icon_cus = base_url + "assets/images/icons/v2/Customer-yellow-non.png"; break;
+                                        case "Completed": icon_cus = base_url + "assets/images/icons/v2/Customer-green-non.png"; break;
+                                        case "Cancel": icon_cus = base_url + "assets/images/icons/v2/Customer-red-non.png"; break;
+                                        case "Engineer_Assigned": icon_cus = base_url + "assets/images/icons/v2/Customer-blue-non.png"; break;
+                                        case "Start_job": icon_cus = base_url + "assets/images/icons/v2/Customer-orange-non.png"; break;
+                                        case "Start_Repair": icon_cus = base_url + "assets/images/icons/v2/Customer-orange-non.png"; break;
+                                        case "Job_Delay": icon_cus = base_url + "assets/images/icons/v2/Customer-lightblue-non.png"; break;
+                                        case "Overtime": icon_cus = base_url + "assets/images/icons/v2/Customer-lightblue-non.png"; break;
+                                        case "LongTimeJourney": icon_cus = base_url + "assets/images/icons/v2/Customer-lightblue-non.png"; break;
+                                    }
+                                    //var index_cus = val.jobs.findIndex(w => w.job_id == val2.job_id);
+
+                                    console.log(val2)
+                                    marker[idx2 + 1] = new google.maps.Marker({
+                                        map: map,
+                                        position: { lat: parseFloat(val2.cus_lat), lng: parseFloat(val2.cus_long) },
+                                        id: idx,
+                                        icon: icon_cus
+                                        , label: {
+                                            color: '#FFFFFF',
+                                            fontWeight: 'bold',
+                                            fontSize: '12px',
+                                            text: val2.job_number.toString()
+                                        }
+                                    });
+
+                                    google.maps.event.addListener(marker[idx2 + 1], 'click', (function (markerValue, i) {
+                                        return function () {
+                                            var div_dialog = document.getElementById('dialog_right');
+                                            $("#dialog_right").html("");
+                                            var html = '';
+                                            html += '<div class="engineer-info">'
+                                            html += '<label>หมายเลขช่าง</label>'
+                                            html += '<span>' + val.en_code + '</span>'
+                                            html += '<label> ชื่อช่าง </label>'
+                                            html += '<span>' + val.en_name + '</span>'
+                                            html += '<label>สาขา</label>'
+                                            html += '<span>' + val.en_site + '</span>'
+                                            html += '<br><br>'
+                                            html += '<label> หมายเลขโทรศัพท์ </label>'
+                                            html += '<span>' + (val.en_tel == null ? "-" : val.en_tel) + '</span>'
+                                            html += '<label>สถานะ</label>'
+                                            html += '<span>พร้อมทำงาน</span>'
+                                            html += '<hr>'
+                                            html += '<div class="job-list">'
+                                            html += '<h3>รายการงาน</h3>'
+                                            html += '<span>' + date + '</span>'
+                                            html += '</div>'
+                                            html += '<div class="job-list-table">'
+                                            html += '<div class="table-mini-tabs">'
+                                            html += '<ul class="nav nav-tabs" role="tablist">' //Nav tabs
+                                            html += '<li role="presentation" class="active" data-tab="0"><a href="#mapproceed" aria-controls="mapproceed" role="tab" data-toggle="tab"><span>' + val.en_count_alljob + '</span> งานซ่อม </a></li>'
+                                            html += '<li role="presentation"><a href="#mappending" aria-controls="mappending" role="tab" data-toggle="tab"><span> ' + val.en_count_pending + ' </span> งานที่เลื่อนเข้าบริการ </a></li>'
+                                            html += '<li role="presentation"><a href="#mapfinished" aria-controls="mapfinished" role="tab" data-toggle="tab"><span> ' + val.en_count_completed + ' </span> งานเสร็จสิ้น </a></li>'
+                                            html += '<li role="presentation"><a href="#mapcancel" aria-controls="mapcancel" role="tab" data-toggle="tab"><span> ' + val.en_count_cencel + ' </span> ยกเลิก </a></li>'
+                                            html += '</ul>'
+                                            html += '<div class="tab-content">'
+                                            html += '<div role="tabpanel" class="tab-pane active" id="mapproceed">'
+                                            html += '<ul>'
+                                            $.each(val.jobs, function (idx2, val2) {
+                                                val2.job_status = val2.job_status.replace('_', ' ');
+                                                if (val2.job_status == "Pending" || val2.job_status == "Engineer Assigned" || val2.job_status == "Start job" || val2.job_status == "Start Repair" || val2.job_status == "Job Delay" || val2.job_status == "Overtime" || val2.job_status == "LongTimeJourney" || val2.job_status == "Completed" || val2.job_status == "Cancel") {
+                                                    var startdate = new Date(val2.startdate);
+                                                    var enddate = new Date(val2.enddate)
+                                                    html += '<li>'
+                                                    html += '<label> หมายเลขงาน </label>'
+                                                    html += '<span>' + val2.job_number + '</span>'
+                                                    html += '<label> สถานะงาน </label>'
+                                                    html += '<span>' + val2.job_status + '</span>'
+                                                    html += '<label> เวลานัดหมาย </label>'
+                                                    html += '<span>' + (startdate.getHours().toString().length == 1 ? "0" + startdate.getHours().toString() : startdate.getHours().toString()) + ':' + (startdate.getMinutes().toString().length == 1 ? startdate.getMinutes().toString() + "0" : startdate.getMinutes().toString()) + '-' + ((enddate.getHours().toString().length == 1 ? "0" + enddate.getHours().toString() : enddate.getHours().toString())) + ':' + ((enddate.getMinutes().toString().length == 1 ? enddate.getMinutes().toString() + "0" : enddate.getMinutes().toString())) + '</span>'
+                                                    html += '<label> ชื่อลูกค้า </label>'
+                                                    html += '<span>' + val2.cus_name + '</span>'
+                                                    html += '<label> หมายเลขโทรศัพท์ </label>'
+                                                    html += '<span>' + val2.cus_tel + '</span>'
+                                                    html += '<label> เครื่องใช้ไฟฟ้า </label>'
+                                                    html += '<span>' + val2.assets + '</span>'
+                                                    html += '</li>'
+                                                }
+                                            });
+                                            html += '</ul>'
+                                            html += '<a href="' + '@{@path}' + 'job/all" class="see-all-job">ดูรายการงานทั้งหมด</a>'
+                                            html += '</div>'
+                                            html += '<div role="tabpanel" class="tab-pane" id="mappending">'
+                                            html += '<ul>'
+                                            $.each(val.jobs, function (idx2, val2) {
+                                                val2.job_status = val2.job_status.replace('_', ' ');
+                                                if (val2.job_status == "Pending") {
+                                                    var startdate = new Date(val2.startdate);
+                                                    var enddate = new Date(val2.enddate)
+                                                    html += '<li>'
+                                                    html += '<label> หมายเลขงาน </label>'
+                                                    html += '<span>' + val2.job_number + '</span>'
+                                                    html += '<label> สถานะงาน </label>'
+                                                    html += '<span>' + val2.job_status + '</span>'
+                                                    html += '<label> เวลานัดหมาย </label>'
+                                                    html += '<span>' + (startdate.getHours().toString().length == 1 ? "0" + startdate.getHours().toString() : startdate.getHours().toString()) + ':' + (startdate.getMinutes().toString().length == 1 ? startdate.getMinutes().toString() + "0" : startdate.getMinutes().toString()) + '-' + ((enddate.getHours().toString().length == 1 ? "0" + enddate.getHours().toString() : enddate.getHours().toString())) + ':' + ((enddate.getMinutes().toString().length == 1 ? enddate.getMinutes().toString() + "0" : enddate.getMinutes().toString())) + '</span>'
+                                                    html += '<label> ชื่อลูกค้า </label>'
+                                                    html += '<span>' + val2.cus_name + '</span>'
+                                                    html += '<label> หมายเลขโทรศัพท์ </label>'
+                                                    html += '<span>' + val2.cus_tel + '</span>'
+                                                    html += '<label> เครื่องใช้ไฟฟ้า </label>'
+                                                    html += '<span>' + val2.assets + '</span>'
+                                                    html += '</li>'
+                                                }
+                                            });
+                                            html += '</ul>'
+                                            html += '</div>'
+                                            html += '<div role="tabpanel" class="tab-pane" id="mapfinished">'
+                                            html += '<ul>'
+                                            $.each(val.jobs, function (idx2, val2) {
+                                                if (val2.job_status == "Completed") {
+                                                    var startdate = new Date(val2.startdate);
+                                                    var enddate = new Date(val2.enddate)
+                                                    val2.job_status = val2.job_status.replace('_', ' ');
+                                                    html += '<li>'
+                                                    html += '<label> หมายเลขงาน </label>'
+                                                    html += '<span>' + val2.job_number + '</span>'
+                                                    html += '<label> สถานะงาน </label>'
+                                                    html += '<span>' + val2.job_status + '</span>'
+                                                    html += '<label> เวลานัดหมาย </label>'
+                                                    html += '<span>' + (startdate.getHours().toString().length == 1 ? "0" + startdate.getHours().toString() : startdate.getHours().toString()) + ':' + (startdate.getMinutes().toString().length == 1 ? startdate.getMinutes().toString() + "0" : startdate.getMinutes().toString()) + '-' + ((enddate.getHours().toString().length == 1 ? "0" + enddate.getHours().toString() : enddate.getHours().toString())) + ':' + ((enddate.getMinutes().toString().length == 1 ? enddate.getMinutes().toString() + "0" : enddate.getMinutes().toString())) + '</span>'
+                                                    html += '<label> ชื่อลูกค้า </label>'
+                                                    html += '<span>' + val2.cus_name + '</span>'
+                                                    html += '<label> หมายเลขโทรศัพท์ </label>'
+                                                    html += '<span>' + val2.cus_tel + '</span>'
+                                                    html += '<label> เครื่องใช้ไฟฟ้า </label>'
+                                                    html += '<span>' + val2.assets + '</span>'
+                                                    html += '</li>'
+                                                }
+                                            });
+                                            html += '</ul>'
+                                            html += '</div>'
+                                            html += '<div role="tabpanel" class="tab-pane" id="mapcancel">'
+                                            html += '<ul>'
+                                            $.each(val.jobs, function (idx2, val2) {
+                                                if (val2.job_status == "Cancel") {
+                                                    var startdate = new Date(val2.startdate);
+                                                    var enddate = new Date(val2.enddate)
+                                                    val2.job_status = val2.job_status.replace('_', ' ');
+                                                    html += '<li>'
+                                                    html += '<label> หมายเลขงาน </label>'
+                                                    html += '<span>' + val2.job_number + '</span>'
+                                                    html += '<label> สถานะงาน </label>'
+                                                    html += '<span>' + val2.job_status + '</span>'
+                                                    html += '<label> เวลานัดหมาย </label>'
+                                                    html += '<span>' + (startdate.getHours().toString().length == 1 ? "0" + startdate.getHours().toString() : startdate.getHours().toString()) + ':' + (startdate.getMinutes().toString().length == 1 ? startdate.getMinutes().toString() + "0" : startdate.getMinutes().toString()) + '-' + ((enddate.getHours().toString().length == 1 ? "0" + enddate.getHours().toString() : enddate.getHours().toString())) + ':' + ((enddate.getMinutes().toString().length == 1 ? enddate.getMinutes().toString() + "0" : enddate.getMinutes().toString())) + '</span>'
+                                                    html += '<label> ชื่อลูกค้า </label>'
+                                                    html += '<span>' + val2.cus_name + '</span>'
+                                                    html += '<label> หมายเลขโทรศัพท์ </label>'
+                                                    html += '<span>' + val2.cus_tel + '</span>'
+                                                    html += '<label> เครื่องใช้ไฟฟ้า </label>'
+                                                    html += '<span>' + val2.assets + '</span>'
+                                                    html += '</li>'
+                                                }
+                                            });
+                                            html += '</ul>'
+                                            html += '</div>'
+                                            html += '</div>'
+                                            html += '</div>'
+                                            html += '</div>'
+                                            html += '<a class="btn-paneclose"><span class="glyphicon glyphicon-remove"></span></a>'
+                                            html += '</div>'
+                                            $("#dialog_right").append(html);
+
+                                            $('.btn-paneclose').click(function (e) {
+                                                e.preventDefault();
+                                                $(".job-info").toggleClass('open');
+                                                $(".job-info ").parent().toggleClass('open');
+                                            });
+
+                                            div_dialog.classList.add("open");
+
+                                        }
+                                    })(marker[idx], idx));
+
+                                    var status_tojob = val2.job_status_int;
+                                    if (counu_job_en == 0 && (status_tojob != 3 && status_tojob != 4)) {
+                                        counu_job_en = count_job;
+                                    }
+                                    count_job++;
+
+                                });
+
+                                counu_job_en = counu_job_en == 0 ? (count_job - 1) : counu_job_en;
+                                marker[idx] = new google.maps.Marker({
+                                    map: map,
+                                    position: { lat: parseFloat(val.en_lat), lng: parseFloat(val.en_long) },
+                                    id: idx,
+                                    icon: icon_en
+                                    , label: {
+                                        color: '#FFFFFF',
+                                        fontWeight: 'bold',
+                                        fontSize: '12px',
+                                        text: job_id_en
+                                    }
+                                });
+
+                                if (!saveEn.includes(val.en_code)) { saveEn.push(val.en_id) }
+
+                                google.maps.event.addListener(marker[idx], 'click', (function (markerValue, i) {
+                                    return function () {
+                                        var div_dialog = document.getElementById('dialog_right');
+                                        $("#dialog_right").html("");
+                                        var html = '';
+                                        html += '<div class="engineer-info">'
+                                        html += '<label>หมายเลขช่าง</label>'
+                                        html += '<span>' + val.en_code + '</span>'
+                                        html += '<label> ชื่อช่าง </label>'
+                                        html += '<span>' + val.en_name + '</span>'
+                                        html += '<label>สาขา</label>'
+                                        html += '<span>' + val.en_site + '</span>'
+                                        html += '<br><br>'
+                                        html += '<label> หมายเลขโทรศัพท์ </label>'
+                                        html += '<span>' + (val.en_tel == null ? "-" : val.en_tel) + '</span>'
+                                        html += '<label>สถานะ</label>'
+                                        html += '<span>พร้อมทำงาน</span>'
+                                        html += '<hr>'
+                                        html += '<div class="job-list">'
+                                        html += '<h3>รายการงาน</h3>'
+                                        html += '<input type="text" value="" class="form-control start-date-input" placeholder="วันที่เริ่มงาน" id="single_cal2">'
+                                        html += '</div>'
+                                        html += '<div class="job-list-table">'
+                                        html += '<div class="table-mini-tabs">'
+                                        html += '<ul class="nav nav-tabs" role="tablist">' //Nav tabs
+                                        html += '<li role="presentation" class="active"><a href="#mapproceed" aria-controls="mapproceed" role="tab" data-toggle="tab"><span>' + val.en_count_alljob + '</span> งานซ่อม </a></li>'
+                                        html += '<li role="presentation"><a href="#mappending" aria-controls="mappending" role="tab" data-toggle="tab"><span> ' + val.en_count_pending + ' </span> งานที่เลื่อนเข้าบริการ </a></li>'
+                                        html += '<li role="presentation"><a href="#mapfinished" aria-controls="mapfinished" role="tab" data-toggle="tab"><span> ' + val.en_count_completed + ' </span> งานเสร็จสิ้น </a></li>'
+                                        html += '<li role="presentation"><a href="#mapcancel" aria-controls="mapcancel" role="tab" data-toggle="tab"><span> ' + val.en_count_cencel + ' </span> ยกเลิก </a></li>'
+                                        html += '</ul>'
+                                        html += '<div class="tab-content">'
+                                        html += '<div role="tabpanel" class="tab-pane active" id="mapproceed">'
+                                        html += '<ul>'
+                                        $.each(val.jobs, function (idx2, val2) {
+                                            val2.job_status = val2.job_status.replace('_', ' ');
+                                            if (val2.job_status == "Pending" || val2.job_status == "Engineer Assigned" || val2.job_status == "Start job" || val2.job_status == "Start Repair" || val2.job_status == "Job Delay" || val2.job_status == "Overtime" || val2.job_status == "LongTimeJourney" || val2.job_status == "Completed" || val2.job_status == "Cancel") {
+                                                var startdate = new Date(val2.startdate);
+                                                var enddate = new Date(val2.enddate)
+                                                html += '<li>'
+                                                html += '<label> หมายเลขงาน </label>'
+                                                html += '<span>' + val2.job_number + '</span>'
+                                                html += '<label> สถานะงาน </label>'
+                                                html += '<span>' + val2.job_status + '</span>'
+                                                html += '<label> เวลานัดหมาย </label>'
+                                                html += '<span>' + (startdate.getHours().toString().length == 1 ? "0" + startdate.getHours().toString() : startdate.getHours().toString()) + ':' + (startdate.getMinutes().toString().length == 1 ? startdate.getMinutes().toString() + "0" : startdate.getMinutes().toString()) + '-' + ((enddate.getHours().toString().length == 1 ? "0" + enddate.getHours().toString() : enddate.getHours().toString())) + ':' + ((enddate.getMinutes().toString().length == 1 ? enddate.getMinutes().toString() + "0" : enddate.getMinutes().toString())) + '</span>'
+                                                html += '<label> ชื่อลูกค้า </label>'
+                                                html += '<span>' + val2.cus_name + '</span>'
+                                                html += '<label> หมายเลขโทรศัพท์ </label>'
+                                                html += '<span>' + val2.cus_tel + '</span>'
+                                                html += '<label> เครื่องใช้ไฟฟ้า </label>'
+                                                html += '<span>' + val2.assets + '</span>'
+                                                html += '</li>'
+                                            }
+                                        });
+                                        html += '</ul>'
+                                        html += '<a href="' + '@{@path}' + 'job/all" class="see-all-job">ดูรายการงานทั้งหมด</a>'
+                                        html += '</div>'
+                                        html += '<div role="tabpanel" class="tab-pane" id="mappending">'
+                                        html += '<ul>'
+                                        $.each(val.jobs, function (idx2, val2) {
+                                            val2.job_status = val2.job_status.replace('_', ' ');
+                                            if (val2.job_status == "Pending") {
+                                                var startdate = new Date(val2.startdate);
+                                                var enddate = new Date(val2.enddate)
+                                                html += '<li>'
+                                                html += '<label> หมายเลขงาน </label>'
+                                                html += '<span>' + val2.job_number + '</span>'
+                                                html += '<label> สถานะงาน </label>'
+                                                html += '<span>' + val2.job_status + '</span>'
+                                                html += '<label> เวลานัดหมาย </label>'
+                                                html += '<span>' + (startdate.getHours().toString().length == 1 ? "0" + startdate.getHours().toString() : startdate.getHours().toString()) + ':' + (startdate.getMinutes().toString().length == 1 ? startdate.getMinutes().toString() + "0" : startdate.getMinutes().toString()) + '-' + ((enddate.getHours().toString().length == 1 ? "0" + enddate.getHours().toString() : enddate.getHours().toString())) + ':' + ((enddate.getMinutes().toString().length == 1 ? enddate.getMinutes().toString() + "0" : enddate.getMinutes().toString())) + '</span>'
+                                                html += '<label> ชื่อลูกค้า </label>'
+                                                html += '<span>' + val2.cus_name + '</span>'
+                                                html += '<label> หมายเลขโทรศัพท์ </label>'
+                                                html += '<span>' + val2.cus_tel + '</span>'
+                                                html += '<label> เครื่องใช้ไฟฟ้า </label>'
+                                                html += '<span>' + val2.assets + '</span>'
+                                                html += '</li>'
+                                            }
+                                        });
+                                        html += '</ul>'
+                                        html += '</div>'
+                                        html += '<div role="tabpanel" class="tab-pane" id="mapfinished">'
+                                        html += '<ul>'
+                                        $.each(val.jobs, function (idx2, val2) {
+                                            if (val2.job_status == "Completed") {
+                                                var startdate = new Date(val2.startdate);
+                                                var enddate = new Date(val2.enddate)
+                                                val2.job_status = val2.job_status.replace('_', ' ');
+                                                html += '<li>'
+                                                html += '<label> หมายเลขงาน </label>'
+                                                html += '<span>' + val2.job_number + '</span>'
+                                                html += '<label> สถานะงาน </label>'
+                                                html += '<span>' + val2.job_status + '</span>'
+                                                html += '<label> เวลานัดหมาย </label>'
+                                                html += '<span>' + (startdate.getHours().toString().length == 1 ? "0" + startdate.getHours().toString() : startdate.getHours().toString()) + ':' + (startdate.getMinutes().toString().length == 1 ? startdate.getMinutes().toString() + "0" : startdate.getMinutes().toString()) + '-' + ((enddate.getHours().toString().length == 1 ? "0" + enddate.getHours().toString() : enddate.getHours().toString())) + ':' + ((enddate.getMinutes().toString().length == 1 ? enddate.getMinutes().toString() + "0" : enddate.getMinutes().toString())) + '</span>'
+                                                html += '<label> ชื่อลูกค้า </label>'
+                                                html += '<span>' + val2.cus_name + '</span>'
+                                                html += '<label> หมายเลขโทรศัพท์ </label>'
+                                                html += '<span>' + val2.cus_tel + '</span>'
+                                                html += '<label> เครื่องใช้ไฟฟ้า </label>'
+                                                html += '<span>' + val2.assets + '</span>'
+                                                html += '</li>'
+                                            }
+                                        });
+                                        html += '</ul>'
+                                        html += '</div>'
+                                        html += '<div role="tabpanel" class="tab-pane" id="mapcancel">'
+                                        html += '<ul>'
+                                        $.each(val.jobs, function (idx2, val2) {
+                                            if (val2.job_status == "Cancel") {
+                                                var startdate = new Date(val2.startdate);
+                                                var enddate = new Date(val2.enddate)
+                                                val2.job_status = val2.job_status.replace('_', ' ');
+                                                html += '<li>'
+                                                html += '<label> หมายเลขงาน </label>'
+                                                html += '<span>' + val2.job_number + '</span>'
+                                                html += '<label> สถานะงาน </label>'
+                                                html += '<span>' + val2.job_status + '</span>'
+                                                html += '<label> เวลานัดหมาย </label>'
+                                                html += '<span>' + (startdate.getHours().toString().length == 1 ? "0" + startdate.getHours().toString() : startdate.getHours().toString()) + ':' + (startdate.getMinutes().toString().length == 1 ? startdate.getMinutes().toString() + "0" : startdate.getMinutes().toString()) + '-' + ((enddate.getHours().toString().length == 1 ? "0" + enddate.getHours().toString() : enddate.getHours().toString())) + ':' + ((enddate.getMinutes().toString().length == 1 ? enddate.getMinutes().toString() + "0" : enddate.getMinutes().toString())) + '</span>'
+                                                html += '<label> ชื่อลูกค้า </label>'
+                                                html += '<span>' + val2.cus_name + '</span>'
+                                                html += '<label> หมายเลขโทรศัพท์ </label>'
+                                                html += '<span>' + val2.cus_tel + '</span>'
+                                                html += '<label> เครื่องใช้ไฟฟ้า </label>'
+                                                html += '<span>' + val2.assets + '</span>'
+                                                html += '</li>'
+                                            }
+                                        });
+                                        html += '</ul>'
+                                        html += '</div>'
+                                        html += '</div>'
+                                        html += '</div>'
+                                        html += '</div>'
+                                        html += '<a class="btn-paneclose"><span class="glyphicon glyphicon-remove"></span></a>'
+                                        html += '</div>'
+                                        $("#dialog_right").append(html);
+
+                                        $('.btn-paneclose').click(function (e) {
+                                            e.preventDefault();
+                                            $(".job-info").toggleClass('open');
+                                            $(".job-info ").parent().toggleClass('open');
+                                        });
+
+                                        div_dialog.classList.add("open");
+
+                                    }
+                                })(marker[idx], idx));
+                            }
+                        });
+                    }
+                });
+                
+                //select_engineer(res, engineer, true);
+                select_engineer();
+            } else {
+                //var e = document.getElementById("selectEngineer");
+                //var select_value = e.options[e.selectedIndex].value;
+                //var select_text = e.options[e.selectedIndex].text;
+                //$("#selectEngineer").html("");
+                //var html_select_en = '';
+                //html_select_en += '<option value="0">ทุกช่าง</option>';
+                //html_select_en += '<option selected value="' + select_value + '">' + select_text + '</option>';
+                //$("#selectEngineer").append(html_select_en);
+            }
+        }
+
+        ///map
+
+        function pagination(count, page, id) {
+            var count = count;
+            var html = "";
+            var count_page = 0;
+            $(id).html("");
+            if (count >= 20) {
+                var style_back = page == 1 ? "pointer-events: none;" : "";
+                html += '<li style="' + style_back + '"><a onClick="click_back(\'' + id + '\')" aria-label="Previous"><span aria-hidden="true"><span class="glyphicon glyphicon-menu-left"></span></span></a></li>'
+                for (i = 1; i <= count; i += 20) {
+                    count_page++;
+                    var style = count_page == page ? 'active' : '';
+                    html += '<li  data-page="' + count_page + '" class="paginate_button ' + style + '"><a onClick="click_page(\'' + count_page + '\',\'' + id + '\')" aria-controls="datatable" tabindex="0">' + count_page + '</a></li>';
+                }
+                var style_next = count_page == page ? "pointer-events: none;" : "";
+                html += '<li style="' + style_next + '"><a onClick="click_next(\'' + id + '\')" aria-label="Next"><span aria-hidden="true"><span class="glyphicon glyphicon-menu-right"></span></span></a></li>'
+                $(id).append(html);
+            }
+        }
+
+        function click_back(id) {
+            var page = $('ul.pagination').find('li.active').data('page');
+            var status = id == "#pagination_alljob" ? 0 : id == "#pagination_repair" ? 1 : id == "#pagination_pending" ? 2 : id == "#pagination_completed" ? 3 : id == "#pagination_cancel" ? 4 : 6;
+            getdata(status, false, page)
+        }
+
+        function click_next(id) {
+            var page = $('ul.pagination').find('li.active').data('page');
+            var status = id == "#pagination_alljob" ? 0 : id == "#pagination_repair" ? 1 : id == "#pagination_pending" ? 2 : id == "#pagination_completed" ? 3 : id == "#pagination_cancel" ? 4 : 6;
+            getdata(status, false, page)
+        }
+
+        function click_page(page, id) {
+            var status = id == "#pagination_alljob" ? 0 : id == "#pagination_repair" ? 1 : id == "#pagination_pending" ? 2 : id == "#pagination_completed" ? 3 : id == "#pagination_cancel" ? 4 : 6;
+            getdata(status, false, page)
+        }
+
+
+        function getdata(status, first, page) {
+            //var check = $('a.mapview').hasClass('active')
+            //if (check) {
+                //$('#proceed').removeClass('active in');
+                //map_realtime(status);
+            //} else {
+            var string = "";
+                var s_start_date = document.getElementById('single_cal2').value;
+                var s_end_date = document.getElementById('single_cal3').value;
+                var job_number = document.getElementById('txtSearchJob').value;
+                var engineer = document.getElementById('selectEngineer').value;
+                var id_table = status == 0 ? "#tbody_alljob" : status == 1 ? "#tbody_repair" : status == 2 ? "#tbody_pending" : status == 3 ? "#tbody_completed" : status == 4 ? "#tbody_cancel" : "#tbody_delayjob";
+                var div_pagination = status == 0 ? "#pagination_alljob" : status == 1 ? "#pagination_repair" : status == 2 ? "#pagination_pending" : status == 3 ? "#pagination_completed" : status == 4 ? "#pagination_cancel" : "#pagination_delayjob";
+                job_number = job_number.toString().trim();
+                $(id_table).html("");
+                $.get(base_url + "realtime/GetDataJob", { status: 0, s_start_date: s_start_date, s_end_date: s_end_date, first: first, job_number: job_number, page: page, engineer: engineer }, function (obj) {
+                    check_first = false;
+                    if (obj.length > 0 && obj[0].store_id != null) {
+                        data_click_status = obj;
+                        engineer_first = false;
+
+                        saveEn = [];
+                        //pagination
+                        $('.pagination').html("");
+                        var count = obj[obj.length - 1].count;
+                        pagination(count, page, div_pagination);
+                        temData = [];
+                        temData = obj;
+                        var saveData = [];
+                        var path = base_url + "job/edit?id=";
+                        var pathsite = base_url + "site/edit?id=";
+                        switch (status) {
+                            case 0:
+                                string = "Completed,Cancel,Engineer_Assigned,Start_job,Start_Repair,Job_Delay,Overtime,LongTimeJourney,Pending";
+                                break;
+                            case 1:
+                                string = "Engineer_Assigned,Start_job,Start_Repair,Job_Delay,Overtime,LongTimeJourney";
+                                break;
+                            case 2:
+                                string = "Pending";
+                                break;
+                            case 6:
+                                string = "Job_Delay,Overtime,LongTimeJourney";
+                                break;
+                            case 3:
+                                string = "Completed";
+                                break;
+                            case 4:
+                                string = "Cancel";
+                                break;
+                        }
+                        $.each(obj, function (idx, val) {
+                            if (val.store_id != null) {
+                                saveData = [];
+
+                                for (var i = 0; i < val.jobs.length; i++) {
+                                    if (string.includes(val.jobs[i].job_status)) {
+                                        saveData.push(val.jobs[i]);
+                                    }
+                                }
+
+                                if (saveData.length > 0) {
+                                    var style_open = idx == 0 ? "open" : "";
+                                    var style_open_collapse = idx == 0 ? "" : "collaped";
+                                    var html = '';
+                                    var style_site_css = val.count_jobDelay > 0 ? "delay" : "";
+                                    html += '<tr class="jobc-status ' + style_site_css + '">';
+                                    html += '<td>' + val.store_name;
+                                    if (val.count_jobDelay > 0) html += '<br><span class="date-status">งานล่าช้า (' + val.count_jobDelay + ')</span>'
+                                    html += '</td>'
+                                    html += '<td>' + (val.store_province == null ? "" : val.store_province) + '</td>';
+                                    html += '<td>' + saveData.length + '</td>';
+                                    html += '<td>' + (val.store_contact == null ? "" : val.store_contact) + '</td>';
+                                    html += '<td>' + (val.store_tel == null ? "" : val.store_tel) + '</td>';
+                                    html += '<td class="open-hour">';
+                                    html += '<p>' + (val.store_date_open1 == "0" || val.store_date_open1 == null ? "" : val.store_date_open1) + " " + (val.store_to_date_open1 == "0" || val.store_to_date_open1 == null ? "" : val.store_to_date_open1) + " " + (val.store_time_open1 == "0" || val.store_time_open1 == null ? "" : val.store_time_open1) + (val.store_to_time_open1 == "0" || val.store_to_time_open1 == null ? "" : " - " + val.store_to_time_open1) + '</p>';
+                                    html += '<p>' + (val.store_date_open2 == "0" || val.store_date_open2 == null ? "" : val.store_date_open2) + " " + (val.store_to_date_open2 == "0" || val.store_to_date_open2 == null ? "" : val.store_to_date_open2) + " " + (val.store_time_open2 == "0" || val.store_time_open2 == null ? "" : val.store_time_open2) + (val.store_to_time_open2 == "0" || val.store_to_time_open2 == null ? "" : " - " + val.store_to_time_open2) + '</p>';
+                                    html += '<p>Close ' + (val.store_close == "0" || val.store_close == null ? "-" : val.store_close) + '</p>';
+                                    html += '</td>';
+                                    html += '<td>';
+                                    html += '<div class="dropdown">';
+                                    html += '<a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></a>';
+                                    html += '<ul class="dropdown-menu" aria-labelledby="dLabel"><li><a href="' + pathsite + val.store_guid + '">แก้ไข</a></li></ul>';
+                                    html += '</div>';
+                                    html += '</td>';
+                                    html += '<td class="toggle-table-child"><a class="' + style_open + '"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></td>';
+                                    html += '</tr>';
+                                    html += '<tr class="minor-table ' + style_open_collapse + '">';
+                                    html += '<td colspan="9" style="padding: 0;">';
+                                    html += '<div class="minor-wrap">'
+                                    html += '<table class="table table-striped">';
+                                    html += '<thead>';
+                                    html += '<tr><th>ลำดับ</th><th>หมายเลขงาน</th><th>ชื่อช่าง</th><th>สถานะงาน</th><th>รายชื่อลูกค้า</th><th>หมายเลขช่าง</th><th>ช่วงเวลาที่ช่างเข้าซ่อม</th><th></th></tr>';
+                                    html += '</thead>';
+                                    html += '<tbody>';
+                                    $.each(saveData, function (idx2, val2) {
+                                        var txtIdx = (idx2 + 1);
+                                        if (status != 0) {
+                                            $.each(val.jobs, function (idx_o, val_o) {
+                                                if (val_o.job_number.toString() == val2.job_number.toString()) {
+                                                    txtIdx = idx_o;
+                                                }
+                                            });
+                                        }
+
+                                        if (!saveEn.includes(val2.en_code)) { saveEn.push(val2.en_id) }
+
+                                        var status_job = val2.job_status.replace("_", " ");
+                                        var date = new Date(val2.app_time)
+                                        var date2 = new Date(val2.app_to_time);
+                                        var text_date = date.getDate() + '/' + monthNames2[date.getMonth()] + '/' + date.getFullYear()
+                                        var text = (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":" + (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes());
+                                        var text2 = (date2.getHours() < 10 ? "0" + date2.getHours() : date2.getHours()) + ":" + (date2.getMinutes() < 10 ? "0" + date2.getMinutes() : date2.getMinutes());
+                                        var style_status = val2.job_status == "Assigned" || val2.job_status == "Engineer_Assigned" ? "proceed"
+                                            : val2.job_status == "Pending" || val2.job_status == "Job_Delay" || val2.job_status == "Overtime" || val2.job_status == "Start_job" || val2.job_status == "Start_Repair" || val2.job_status == "LongTimeJourney" ? "pending"
+                                                : val2.job_status == "Completed" ? "finished"
+                                                    : val2.job_status == "Cancel" ? "cancel" : "";
+                                        var style_status2 = val2.job_status == "Job_Delay" ? "delay" : "";
+                                        var status_job_alert = val2.job_status == "Job_Delay" ? " งานล่าช้า" : val2.job_status == "Overtime" ? " ซ่อมล่าช้า" : " เดินทาง";
+                                        html += '<tr class="jobc-status ' + style_status2 + '">';
+                                        html += '<td>' + (idx + 1) + '-' + (txtIdx + 1) + '</td>';
+                                        html += '<td>' + val2.job_number;
+                                        if (val2.job_status == "Job_Delay") html += '<br><span class="date-status">' + status_job_alert + '</span>'
+                                        html += '</td >'
+                                        html += '<td>' + val2.en_name + '</td>';
+                                        html += '<td class="job-status ' + style_status + '"><span>' + status_job + '</span></td>';
+                                        html += '<td>' + val2.customer_name + '</td>';
+                                        html += '<td>' + val2.en_code + '</td>';
+                                        html += '<td>' + (val2.app_time != null && val2.app_to_time != null ? text_date + " " : "<p>กรุณาตั้งเวลา</p>") + (val2.app_time != null && val2.app_to_time != null ? text : "") + (val2.app_to_time != null ? " - " + text2 : "") + '</td>';
+                                        html += '<td>';
+                                        html += '<div class="dropdown">';
+                                        html += '<a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></a>';
+                                        html += '<ul class="dropdown-menu" aria-labelledby="dLabel"><li><a href="' + path + val2.job_guid + '">แก้ไข</a></li><li><a href="">ลบข้อมูล</a></li></ul>';
+                                        html += '</div>';
+                                        html += '</td>';
+                                        html += '</tr>';
+                                    })
+                                    html += '</tbody>';
+                                    html += '</table>';
+                                    html += '</div>'
+                                    html += '</td>';
+                                    html += '</tr>';
+
+                                    //$('#proceed').removeClass('active in'); $('#pending').removeClass('active in'); $('#delayjob').removeClass('active in'); $('#finished').removeClass('active in'); $('#cancel').removeClass('active in');
+                                    //$('#home').addClass('active in');
+                                    $(id_table).append(html);
+                                }
+                            }
+                        });
+
+                        //select_engineer(obj, engineer, false);
+                        select_engineer();
+
+                        $('.toggle-table-child a').click(function (e) {
+                            e.preventDefault();
+                            $(this).toggleClass('open');
+                            $(this).parent().parent().next().toggleClass('collaped');
+                            $(this).parent().parent().toggleClass('open');
+                        });
+                    }
+                    else
+                    {
+                        var e = document.getElementById("selectEngineer");
+                        var select_value = e.options[e.selectedIndex].value;
+                        var select_text = e.options[e.selectedIndex].text;
+                        $("#selectEngineer").html("");
+                        var html_select_en = '';
+                        html_select_en += '<option value="0">ทุกช่าง</option>';
+                        html_select_en += '<option selected value="' + select_value + '">' + select_text+'</option>';
+                        $("#selectEngineer").append(html_select_en);
+                        $(id_table).html("");
+                        $('.pagination').html("");
+                        temData = [];
+                    }
+                });
+            //}
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+        }
+
+        function select_engineer() {
+            //select engineer
+
+            //$("#selectEngineer").children('option').hide();
+
+
+            ////$("#selectEngineer option[value=" + "160" + "]").hide();
+            //$("#selectEngineer option[value='0']").show();
+            //for (var i = 0; i < saveEn.length; i++) {
+            //    $("#selectEngineer option[value=" + saveEn[i] + "]").show();
+            //}
+        }
+
+        function btn_search() {
+            var s_start_date = document.getElementById('single_cal2').value;
+            var s_end_date = document.getElementById('single_cal3').value;
+
+            var moment_start = moment(s_start_date, "DD/MM/YYYY");
+            var moment_end = moment(s_end_date, "DD/MM/YYYY");
+
+            var start_date = new Date(moment_start);
+            var end_date = new Date(moment_end);
+            var Difference_In_Time = end_date.getDate() - start_date.getDate();
+
+            if (Difference_In_Time <= 7) {
+                var job_number = document.getElementById('txtSearchJob').value;
+
+                var check = $('a.mapview').hasClass('active')
+
+                if (check) {
+                    var status = $('ul#tab_status').find('li.active').data('tab');
+                    var engineer = document.getElementById('selectEngineer').value;
+                    job_number = job_number.toString().trim();
+
+                    $.get(base_url + "realtime/Count_job", { s_start_date: s_start_date, s_end_date: s_end_date, first: false, job_number: job_number, engineer: engineer }, function (obj) {
+
+                        //set count job
+                        document.getElementById('count_all_job').innerHTML = obj[0].all_job;
+                        document.getElementById('count_repair').innerHTML = obj[0].repair;
+                        document.getElementById('count_pending').innerHTML = obj[0].pending;
+                        document.getElementById('count_delay_job').innerHTML = obj[0].delay_job;
+                        document.getElementById('count_completed').innerHTML = obj[0].completed;
+                        document.getElementById('count_cancel').innerHTML = obj[0].cancel;
+                    });
+                    console.log(status)
+                    $.get(base_url + "realtime/DataMap", { s_start_date: s_start_date, s_end_date: s_end_date, status: 0, job_number: job_number, engineer: engineer }, function (res) {
+                        initMap(res, status)
+                    });
+                    $("ul#tab_status").find('li').removeClass('active');
+                    $("ul#tab_status li").first().addClass('active');
+                } else {
+                    setData(s_start_date, s_end_date, job_number);
+                }
+
+                formatDate(false);
+            } else {
+                alert("ค้นหาข้อมูลได้ไม่เกิน 7 วัน");
+            }
+
+
+           
+        }
+
+        function formatDate(oneday, startdate) {
+            $("#topic_day").html("");
+            var monthNames = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]; // 0 = ม.ค.
+            var dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัส", "ศุกร์", "เสาร์"]; // 0 = อาทิตย์
+            var text;
+
+            if (oneday) {
+                var dayIndex = startdate == 0 ? date.getDay() : tomorrow.getDay();
+                var monthIndex = startdate == 0 ? date.getMonth() : tomorrow.getMonth();
+                var year = startdate == 0 ? date.getFullYear() + 543 : tomorrow.getFullYear() + 543;
+                var day = startdate == 0 ? date.getDate() : tomorrow.getDate();
+
+                text = dayNames[dayIndex] + 'ที่' + ' ' + day + ' ' + monthNames[monthIndex] + ' ' + year;
+                $("#topic_day").append(text);
+                $("#topic_day2").append(text);
+            } else {
+                var txt_s_start_date = $("#single_cal2").val().split("/");//document.getElementById('single_cal2').value;
+                var txt_s_end_date = $("#single_cal3").val().split("/");//document.getElementById('single_cal3').value;
+
+                var s_start_date = new Date(txt_s_start_date[2], txt_s_start_date[1] - 1, txt_s_start_date[0])
+                var s_end_date = new Date(txt_s_end_date[2], txt_s_end_date[1] - 1, txt_s_end_date[0])
+
+                var d_s_start_date = new Date(s_start_date);
+                var d_s_end_date = new Date(s_end_date);
+
+                var s_dayIndex = d_s_start_date.getDay();
+                var s_monthIndex = d_s_start_date.getMonth();
+                var s_year = d_s_start_date.getFullYear() + 543;
+
+                var e_dayIndex = d_s_end_date.getDay();
+                var e_monthIndex = d_s_end_date.getMonth();
+                var e_year = d_s_end_date.getFullYear() + 543;
+
+                text = s_start_date == s_end_date ? dayNames[s_dayIndex] + 'ที่' + ' ' + d_s_start_date.getDate() + ' ' + monthNames[s_monthIndex] + ' ' + s_year : dayNames[s_dayIndex] + 'ที่' + ' ' + d_s_start_date.getDate() + ' ' + monthNames[s_monthIndex] + ' ' + s_year + ' - ' + dayNames[e_dayIndex] + 'ที่' + ' ' + d_s_end_date.getDate() + ' ' + monthNames[e_monthIndex] + ' ' + e_year;
+                $("#topic_day").append(text);
+            }
+        }
+
+        function click_date(data) {
+            var job_number = document.getElementById('txtSearchJob').value;
+            var check = $('a.mapview').hasClass('active')
+            var today = "";
+            if (data == 0) {
+                tomorrow.setDate(date.getDate());
+                var setdate_time = (date.getDate() < 10 ? '0' + (date.getDate().toString()) : (date.getDate().toString())) + '/' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1).toString() : (date.getMonth() + 1).toString()) + '/' + date.getFullYear().toString();
+                document.getElementById('single_cal2').value = setdate_time;
+                document.getElementById('single_cal3').value = setdate_time;
+                today = setdate_time;
+                tomorrow = new Date(date)
+                //formatDate(true, data);
+            } else {
+                if (data == 1) {
+                    tomorrow.setDate(tomorrow.getDate() - 1);
+                    var setdate_time = (tomorrow.getDate() < 10 ? '0' + tomorrow.getDate().toString() : tomorrow.getDate().toString()) + '/' +  (tomorrow.getMonth() < 9 ? '0' + (tomorrow.getMonth() + 1).toString() : (tomorrow.getMonth() + 1).toString()) + '/' + tomorrow.getFullYear().toString();
+                    document.getElementById('single_cal2').value = setdate_time;
+                    document.getElementById('single_cal3').value = setdate_time;
+                    today = setdate_time;
+
+                } else {
+                   
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    var setdate_time = (tomorrow.getDate() < 10 ? '0' + tomorrow.getDate().toString() : tomorrow.getDate().toString()) + '/' + (tomorrow.getMonth() < 10 ? '0' + (tomorrow.getMonth() + 1).toString() : (tomorrow.getMonth() + 1).toString()) + '/' + tomorrow.getFullYear().toString();
+                    console.log(setdate_time)
+                    document.getElementById('single_cal2').value = setdate_time;
+                    document.getElementById('single_cal3').value = setdate_time;
+                    today = setdate_time;
+
+                    //formatDate(true, 1);
+                }
+            }
+            var status = $('ul#tab_status').find('li.active').data('tab');
+            var s_start_date = document.getElementById('single_cal2').value;
+            var s_end_date = document.getElementById('single_cal3').value;
+            var engineer = document.getElementById('selectEngineer').value;
+            job_number = job_number.toString().trim();
+            if (check) {
+                $.get(base_url + "realtime/Count_job", { s_start_date: s_start_date, s_end_date: s_end_date, first: false, job_number: job_number, engineer: engineer }, function (obj) {
+
+                    //set count job
+                    document.getElementById('count_all_job').innerHTML = obj[0].all_job;
+                    document.getElementById('count_repair').innerHTML = obj[0].repair;
+                    document.getElementById('count_pending').innerHTML = obj[0].pending;
+                    document.getElementById('count_delay_job').innerHTML = obj[0].delay_job;
+                    document.getElementById('count_completed').innerHTML = obj[0].completed;
+                    document.getElementById('count_cancel').innerHTML = obj[0].cancel;
+                });
+                $.get(base_url + "realtime/DataMap", { s_start_date: s_start_date, s_end_date: s_end_date, status: status, job_number: job_number, engineer: engineer }, function (res) {
+                    initMap(res, status)
+                });
+                $("ul#tab_status").find('li').removeClass('active');
+                $("ul#tab_status li").first().addClass('active');
+            } else {
+                setData(today, today, job_number);
+            }
+            formatDate(true, -1);
+            resetPage();
+        }
+
+        function resetPage() {
+            if ($('#tab_status li').hasClass('active')) {
+                $('#tab_status li').removeClass('active');
+                $('#tab_status li').first().addClass('active');
+            }
+        }
+
+        function setData(s_start_date, s_end_date, job_number) {
+            //set count_job
+            var engineer = document.getElementById('selectEngineer').value;
+            job_number = job_number.toString().trim();
+            $.get(base_url + "realtime/Count_job", { s_start_date: s_start_date, s_end_date: s_end_date, first: false, job_number: job_number, engineer: engineer }, function (obj) {
+
+                //set count job
+                document.getElementById('count_all_job').innerHTML = obj[0].all_job ;
+                document.getElementById('count_repair').innerHTML = obj[0].repair ;
+                document.getElementById('count_pending').innerHTML = obj[0].pending;
+                document.getElementById('count_delay_job').innerHTML = obj[0].delay_job;
+                document.getElementById('count_completed').innerHTML = obj[0].completed ;
+                document.getElementById('count_cancel').innerHTML = obj[0].cancel ;
+            });
+            var status = $('ul#tab_status').find('li.active').data('tab');
+            getdata(status, false, 1)
+        }
+
+        function click_status_map(status) {
+            initMap(temDataMap, status)
+        }
+
+        function click_status(status) {
+            //var string = "";
+            //var id_table = "";
+            //var div_pagination = "";
+            //var html = '';
+            //var path = base_url + "job/edit?id=";
+            //var pathsite = base_url + "site/edit?id=";
+            var check = $('a.mapview').hasClass('active')
+            if (check) {
+                $('#proceed').removeClass('active in');
+                click_status_map(status);
+            } else {
+                //getdata
+                
+
+                if (data_click_status == null) {
+                    $.ajax({
+                        url: base_url + "realtime/getdate_ClickStatus",
+                        type: "POST",
+                        //async: false,
+                        success: function (obj) {
+                            data_click_status = obj;
+                            if (!_.isUndefined(obj) && obj.length > 0) {
+                                domStatus(obj, status);
+                            }
+                        },
+                        error: function (err) {
+
+                        }
+                    })
+                } else {
+                    domStatus(data_click_status, status);
+                }
+            }
+        }
+
+        function domStatus(data, status) {
+            data = check_first ? data : temData;
+            var string = "";
+            var id_table = "";
+            var div_pagination = "";
+            var html = '';
+            var path = base_url + "job/edit?id=";
+            var pathsite = base_url + "site/edit?id=";
+            //getstatus and id div , id pagination
+
+            switch (status) {
+                case 0: string = "Completed,Cancel,Engineer_Assigned,Start_job,Start_Repair,Job_Delay,Overtime,LongTimeJourney,Pending"; id_table = "#tbody_alljob"; div_pagination = "pagination_alljob"; break;
+                case 1: string = "Engineer_Assigned,Start_job,Start_Repair,Job_Delay,Overtime,LongTimeJourney"; id_table = "#tbody_repair"; div_pagination = "pagination_repair"; break;
+                case 2: string = "Pending"; id_table = "#tbody_pending"; div_pagination = "pagination_pending"; break;
+                case 6: string = "Job_Delay,Overtime,LongTimeJourney"; id_table = "#tbody_delayjob"; div_pagination = "pagination_delayjob"; break;
+                case 3: string = "Completed"; id_table = "#tbody_completed"; div_pagination = "pagination_completed"; break;
+                case 4: string = "Cancel"; id_table = "#tbody_cancel"; div_pagination = "pagination_cancel"; break;
+            }
+
+            $(id_table).html("");
+            //pagination
+            $('.pagination').html("");
+            var count = data[data.length - 1].count;
+            pagination(count, 1, div_pagination);
+            var saveData = [];
+            saveEn = [];
+            var count_dataJob = [];
+            //dom
+            var count_style = 0;
+            var count_job = 0;
+            var engineer = document.getElementById('selectEngineer').value;
+
+            $.each(data, function (idx, val) {
+                if (val.store_id != null) {
+                    //check and add
+                    saveData = [];
+                    for (var i = 0; i < val.jobs.length; i++) {
+                        if (string.includes(val.jobs[i].job_status)) {
+                            saveData.push(val.jobs[i]);
+                            count_dataJob.push(i + 1);
+                        }
+                    }
+                    if (saveData.length > 0) {
+                        var style_open = count_style == 0 ? "open" : "";
+                        var style_open_collapse = count_style == 0 ? "" : "collaped";
+                        var style_site_css = val.count_jobDelay > 0 ? "delay" : "";
+                        html += '<tr class="jobc-status ' + style_site_css + '">';
+                        html += '<td>' + val.store_name;
+                        if (val.count_jobDelay > 0) html += '<br><span class="date-status">งานล่าช้า (' + val.count_jobDelay + ')</span>'
+                        html += '</td>'
+                        html += '<td>' + (val.store_province == null ? "" : val.store_province) + '</td>';
+                        html += '<td>' + saveData.length + '</td>';
+                        html += '<td>' + (val.store_contact == null ? "" : val.store_contact) + '</td>';
+                        html += '<td>' + (val.store_tel == null ? "" : val.store_tel) + '</td>';
+                        html += '<td class="open-hour">';
+                        html += '<p>' + (val.store_date_open1 == "0" || val.store_date_open1 == null ? "" : val.store_date_open1) + " " + (val.store_to_date_open1 == "0" || val.store_to_date_open1 == null ? "" : val.store_to_date_open1) + " " + (val.store_time_open1 == "0" || val.store_time_open1 == null ? "" : val.store_time_open1) + (val.store_to_time_open1 == "0" || val.store_to_time_open1 == null ? "" : " - " + val.store_to_time_open1) + '</p>';
+                        html += '<p>' + (val.store_date_open2 == "0" || val.store_date_open2 == null ? "" : val.store_date_open2) + " " + (val.store_to_date_open2 == "0" || val.store_to_date_open2 == null ? "" : val.store_to_date_open2) + " " + (val.store_time_open2 == "0" || val.store_time_open2 == null ? "" : val.store_time_open2) + (val.store_to_time_open2 == "0" || val.store_to_time_open2 == null ? "" : " - " + val.store_to_time_open2) + '</p>';
+                        html += '<p>Close ' + (val.store_close == "0" || val.store_close == null ? "-" : val.store_close) + '</p>';
+                        html += '</td>';
+                        html += '<td>';
+                        html += '<div class="dropdown">';
+                        html += '<a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></a>';
+                        html += '<ul class="dropdown-menu" aria-labelledby="dLabel"><li><a href="' + pathsite + val.store_guid + '">แก้ไข</a></li></ul>';
+                        html += '</div>';
+                        html += '</td>';
+                        html += '<td class="toggle-table-child"><a class="' + style_open + '"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></td>';
+                        html += '</tr>';
+                        html += '<tr class="minor-table ' + style_open_collapse + '">';
+                        html += '<td colspan="9" style="padding: 0;">';
+                        html += '<div class="minor-wrap">'
+                        html += '<table class="table table-striped">';
+                        html += '<thead>';
+                        html += '<tr><th>ลำดับ</th><th>หมายเลขงาน</th><th>ชื่อช่าง</th><th>สถานะงาน</th><th>รายชื่อลูกค้า</th><th>หมายเลขช่าง</th><th>ช่วงเวลาที่ช่างเข้าซ่อม</th><th></th></tr>';
+                        html += '</thead>';
+                        html += '<tbody>';
+                        count_job = 1;
+                        $.each(saveData, function (idx2, val2) {
+                            var status_job = val2.job_status.replace("_", " ");
+                            var date = val2.app_time != null ? val2.app_time.search("Date") != -1 ? new Date(parseInt(val2.app_time.replace('/Date(', '').replace(')/', ''))) : new Date(val2.app_time) : "";
+                            var date2 = val2.app_to_time != null ? val2.app_to_time.search("Date") != -1 ? new Date(parseInt(val2.app_to_time.replace('/Date(', '').replace(')/', ''))) : new Date(val2.app_to_time) : "";
+                            var text_date = date.getDate() + '/' + monthNames2[date.getMonth()] + '/' + date.getFullYear()
+                            var text = (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":" + (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes());
+                            var text2 = (date2.getHours() < 10 ? "0" + date2.getHours() : date2.getHours()) + ":" + (date2.getMinutes() < 10 ? "0" + date2.getMinutes() : date2.getMinutes());
+                            var style_status = val2.job_status == "Assigned" || val2.job_status == "Engineer_Assigned" ? "proceed"
+                                : val2.job_status == "Pending" || val2.job_status == "Job_Delay" || val2.job_status == "Overtime" || val2.job_status == "Start_job" || val2.job_status == "Start_Repair" || val2.job_status == "LongTimeJourney" ? "pending"
+                                    : val2.job_status == "Completed" ? "finished"
+                                        : val2.job_status == "Cancel" ? "cancel" : "";
+                            var style_status2 = val2.job_status == "Job_Delay" ? "delay" : "";
+                            var status_job_alert = val2.job_status == "Job_Delay" ? " งานล่าช้า" : val2.job_status == "Overtime" ? " ซ่อมล่าช้า" : " เดินทาง";
+
+                            if (!saveEn.includes(val2.en_code)) { saveEn.push(val2.en_id) }
+
+                            html += '<tr class="jobc-status ' + style_status2 + '">';
+                            html += (id_table == "#tbody_alljob" ? '<td>' + (idx + 1) + '-' + count_job + '</td>' : '<td>' + (idx + 1) + '-' + count_dataJob[idx2] + '</td>');
+                            html += '<td>' + val2.job_number;
+                            if (val2.job_status == "Job_Delay") html += '<br><span class="date-status">' + status_job_alert + '</span>'
+                            html += '</td >'
+                            html += '<td>' + val2.en_name + '</td>';
+                            html += '<td class="job-status ' + style_status + '"><span>' + status_job + '</span></td>';
+                            html += '<td>' + val2.customer_name + '</td>';
+                            html += '<td>' + val2.en_code + '</td>';
+                            html += '<td>' + (val2.app_time != null && val2.app_to_time != null ? text_date + " " : "<p>กรุณาตั้งเวลา</p>") + (val2.app_time != null && val2.app_to_time != null ? text : "") + (val2.app_to_time != null ? " - " + text2 : "") + '</td>';
+                            html += '<td>';
+                            html += '<div class="dropdown">';
+                            html += '<a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></a>';
+                            html += '<ul class="dropdown-menu" aria-labelledby="dLabel"><li><a href="' + path + val2.job_guid + '">แก้ไข</a></li><li><a href="">ลบข้อมูล</a></li></ul>';
+                            html += '</div>';
+                            html += '</td>';
+                            html += '</tr>';
+                            count_job++;
+                        });
+                        html += '</tbody>';
+                        html += '</table>';
+                        html += '</div>'
+                        html += '</td>';
+                        html += '</tr>';
+                        count_style++;
+                    }
+                }
+            });
+
+            @*var list_engineer = @Html.Raw(Json.Encode((List<s_tracking_mobile.Models.getEngineer>)ViewData["all_Engineer"]));
+            list_engineer = check_first ? list_engineer : temData;*@
+
+            //select_engineer(list_engineer, engineer, false);
+            select_engineer();
+            $(id_table).append(html);
+
+            $('.toggle-table-child a').click(function (e) {
+                e.preventDefault();
+                $(this).toggleClass('open');
+                $(this).parent().parent().next().toggleClass('collaped');
+                $(this).parent().parent().toggleClass('open');
+            });
+        }
+
+    </script>
+}

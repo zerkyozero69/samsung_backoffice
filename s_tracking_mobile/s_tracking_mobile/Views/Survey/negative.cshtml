@@ -1,0 +1,172 @@
+﻿@using System.Configuration;
+@{
+    /**/
+
+    ViewBag.Title = "negative";
+    string path = ConfigurationManager.AppSettings["Base_URL"];
+    var data = ViewData["data"] as CommonLib.in_setting_survey;
+}
+
+<input type="hidden" id="setting_id" value="@data.id" />
+
+<div class="content">
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h1>
+                        ตั้งค่าการกรองแบบสอบถามเชิงลบ
+                    </h1>
+                    <div class="form-tools">
+                        <a href="@{@path}survey" class="back-btn">
+                            กลับ
+                        </a>
+                        <a onclick="btn_save()" class="exitsave-btn">
+                            บันทึกและออก
+                        </a>
+
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+
+            <div class="x_panel form">
+                <span class="section">ตั้งค่า</span>
+                <div id="demo-form2" class="form-horizontal form-label-left" novalidate="">
+                    <div class="form-group warning">
+                        <label class="control-label col-md-2 col-sm-2 col-xs-12" for="first-name">
+                            เปิดใช้งาน
+                        </label>
+                        <div class="col-md-4 col-sm-4 col-xs-12">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" id="is_enable" @(data.is_enable == 1 ? "checked" : "")>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                </div>
+
+
+
+                <span class="section">การแจ้งเตือน</span>
+                <div id="demo-form2" class="form-horizontal form-label-left" novalidate="">
+                    ระบบจะส่งอีเมล์แจ้งเตือนอีกชุดไปยังผู้ดูแลการประมวลผล ตามอีเมล์ด้านล่าง
+                    <div class="form-group warning">
+                        <label class="control-label col-md-2 col-sm-2 col-xs-12" for="first-name">
+                            เปิดการแจ้งเตือน
+                        </label>
+                        <div class="col-md-4 col-sm-4 col-xs-12">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" id="is_noti" @(data.is_notifi == 1 ? "checked" : "")>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="control-label col-md-2 col-sm-2 col-xs-12" for="first-name">
+                            Email #1
+                        </label>
+                        <div class="col-md-4 col-sm-4 col-xs-12">
+                            <input type="text" value="@data.notifi_email1" id="email1" class="form-control" required="required">
+                        </div>
+                        <label class="control-label col-md-2 col-sm-2 col-xs-12" for="first-name">
+                            Email #3
+                        </label>
+                        <div class="col-md-4 col-sm-4 col-xs-12">
+                            <input type="text" value="@data.notifi_email3" id="email3" class="form-control" required="required">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-2 col-sm-2 col-xs-12" for="first-name">
+                            Email #2
+                        </label>
+                        <div class="col-md-4 col-sm-4 col-xs-12">
+                            <input value="@data.notifi_email2" type="text" id="email2" class="form-control" required="required">
+                        </div>
+                        <label class="control-label col-md-2 col-sm-2 col-xs-12" for="first-name">
+                            Email #4
+                        </label>
+                        <div class="col-md-4 col-sm-4 col-xs-12">
+                            <input value="@data.notifi_email4" type="text" id="email4" class="form-control" required="required">
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+
+    <script>
+
+
+        $(document).ready(function () {
+
+        });
+
+        function btn_save() {
+
+            var base_url = "@path"
+
+            var body = {
+                setting_id: $('#setting_id').val(),
+                is_enable: $('#is_enable').is(":checked"),
+
+                is_noti: $('#is_noti').is(":checked"),
+                email1: $('#email1').val(),
+                email2: $('#email2').val(),
+                email3: $('#email3').val(),
+                email4: $('#email4').val(),
+            }
+
+            $.ajax({
+                url: base_url + "survey/SaveNegative",
+                data: JSON.stringify(body),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+
+                type: "POST",
+                
+                success: function (val) {
+
+                    if (val.result == true) {
+
+                        new PNotify({
+                            title: "บันทึกสำเร็จแล้ว",
+                            delay: 100,
+                            type: "success",
+                            styling: 'bootstrap3'
+                        });
+
+
+                        window.location.replace("@{@path}survey/all");
+                    }
+                    else {
+                        //handle fail
+                    }
+                },
+                error: function (err) {
+                    console.log(err)
+                }
+            })
+
+
+        }
+
+
+    </script>
+
+
+}

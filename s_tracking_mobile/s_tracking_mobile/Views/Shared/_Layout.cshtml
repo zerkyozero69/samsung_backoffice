@@ -1,0 +1,611 @@
+﻿@using System.Configuration;
+@using CommonLib;
+<!DOCTYPE html>
+<html>
+<head>
+    @{
+        s_tracking_mobileEntities db = new s_tracking_mobileEntities();
+        string path = ConfigurationManager.AppSettings["Base_URL"];
+        string firebase_apikey = ConfigurationManager.AppSettings["Firebase_ApiKey"];
+        string firebase_authdomain = ConfigurationManager.AppSettings["Firebase_AuthDomain"];
+        string firebase_databaseURL = ConfigurationManager.AppSettings["Firebase_DataBaseURL"];
+        string firebase_projectId = ConfigurationManager.AppSettings["Firebase_ProjectId"];
+        string firebase_storageBucket = ConfigurationManager.AppSettings["Firebase_StorageBucket"];
+        string firebase_messagingSenderID = ConfigurationManager.AppSettings["Firebase_MessagingSenderId"];
+        string firebase_appID = ConfigurationManager.AppSettings["Firebase_AppID"];
+
+        ViewBag.name = User.Identity.Name;
+        ViewBag.roleUser = User.IsInRole("admin"); //get tole
+
+        if (ViewBag.name != "" && ViewBag.name != null)
+        {
+            var CheckUser = Membership.GetUser(ViewBag.name).ProviderUserKey;
+            Guid convertGuid = new Guid(CheckUser.ToString());
+            var idStore = ViewBag.roleUser != true ? db.tb_mapping_store.Where(w => w.account_guid == convertGuid).Select(s => s.site_id).FirstOrDefault() : 0;
+
+            ViewBag.id_store = idStore;
+
+        }
+    }
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <!-- Bootstrap -->
+    <link href="@{@path}assets/css/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="@{@path}assets/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <!-- NProgress -->
+    <link href="@{@path}assets/vendors/nprogress/nprogress.css" rel="stylesheet">
+    <!-- iCheck -->
+    <link href="@{@path}assets/vendors/iCheck/skins/flat/green.css" rel="stylesheet">
+    <!-- bootstrap-wysiwyg -->
+    @*<link href="@{@path}assets/vendors/google-code-prettify/bin/prettify.min.css" rel="stylesheet">*@
+    <!-- Select2 -->
+    <link href="@{@path}assets/vendors/select2/dist/css/select2.min.css" rel="stylesheet">
+    <!-- Switchery -->
+    <link href="@{@path}assets/vendors/switchery/dist/switchery.min.css" rel="stylesheet">
+    <!-- starrr -->
+    <link href="@{@path}assets/vendors/starrr/dist/starrr.css" rel="stylesheet">
+    <!-- bootstrap-daterangepicker -->
+    <link href="@{@path}assets/vendors/bootstrap-daterangepicker/daterangepicker.css" rel="stylesheet">
+    <!-- jQuery custom content scroller -->
+    <link href="@{@path}assets/css/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet" />
+    <!-- Custom Theme Style -->
+    <link href="@{@path}assets/css/custom.css" rel="stylesheet">
+    <!-- Dropzone.js -->
+    <link href="@{@path}assets/css/dropzone/dist/min/dropzone.min.css" rel="stylesheet">
+    <link href="@{@path}assets/css/ss-engineer.css" rel="stylesheet">
+    <!-- PNotify -->
+    <link href="@{@path}assets/vendors/pnotify/dist/pnotify.css" rel="stylesheet">
+    <link href="@{@path}assets/vendors/pnotify/dist/pnotify.buttons.css" rel="stylesheet">
+    <link href="@{@path}assets/vendors/pnotify/dist/pnotify.nonblock.css" rel="stylesheet">
+    @RenderSection("header", required: false)
+    <script type='text/javascript'>
+        var appInsights = window.appInsights || function (config) {
+            function r(config) { t[config] = function () { var i = arguments; t.queue.push(function () { t[config].apply(t, i) }) } }
+            var t = { config: config }, u = document, e = window, o = 'script', s = u.createElement(o), i, f; for (s.src = config.url || '//az416426.vo.msecnd.net/scripts/a/ai.0.js', u.getElementsByTagName(o)[0].parentNode.appendChild(s), t.cookie = u.cookie, t.queue = [], i = ['Event', 'Exception', 'Metric', 'PageView', 'Trace', 'Ajax']; i.length;)r('track' + i.pop()); return r('setAuthenticatedUserContext'), r('clearAuthenticatedUserContext'), config.disableExceptionTracking || (i = 'onerror', r('_' + i), f = e[i], e[i] = function (config, r, u, e, o) { var s = f && f(config, r, u, e, o); return s !== !0 && t['_' + i](config, r, u, e, o), s }), t
+        }({
+            instrumentationKey: 'a4eb2873-2f78-45b2-baf7-d7595b556eaa'
+        });
+
+        window.appInsights = appInsights;
+        appInsights.trackPageView();
+    </script>
+</head>
+<body class="nav-md">
+    <div class="container body">
+        <div class="main_container">
+            <div class="col-md-3 left_col ">
+                <div class="left_col scroll-view">
+                    <div class="navbar nav_title" style="border: 0;">
+                        <a href="@{@path}realtime/index" class="site_title">
+                            <img src="@{@path}assets/images/logo_swat.png" width="100%">
+                            @*<span>SWAT Application</span>*@
+                        </a>
+                    </div>
+                    <div class="clearfix"></div>
+                    <br />
+                    <!-- sidebar menu -->
+                    <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+                        <div class="menu_section">
+                            <h3><img src="@{@path}assets/images/ico/import-ico.png" alt=""><a href="@{@path}job/import">นำข้อมูลงานเข้าระบบ</a></h3>
+                            <ul class="nav side-menu">
+
+
+                                <li id="li_realtime"><a href="@{@path}realtime/index">ตารางงานในขณะนี้</a></li>
+                                @if (ViewBag.roleUser)
+                                {
+                                    <li id="li_category">
+                                        <a>เครื่องใช้ไฟฟ้า<span class="fa fa-chevron-down"></span></a>
+                                        <ul class="nav child_menu" id="ul_category">
+                                            <li><a href="@{@path}category/addCategory">เพิ่มประเภทเครื่องใช้ไฟฟ้า</a></li>
+                                            <li><a href="@{@path}category/addSub?id=0">เพิ่มรายชื่อเครื่องใช้ไฟฟ้า</a></li>
+                                            <li><a href="@{@path}category/all">ดูรายชื่อเครื่องใช้ไฟฟ้า</a></li>
+                                        </ul>
+                                    </li>
+                                }
+                                <li id="li_site_and_engineer">
+                                    <a>ศูนย์บริการ<span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu" id="ul_site_and_engineer">
+                                        @if (ViewBag.roleUser)
+                                        {
+                                            <li><a href="@{@path}site/add">เพิ่มรายชื่อศูนย์บริการ</a></li>}
+                                        <li><a href="@{@path}site/all">ดูรายชื่อศูนย์บริการ</a></li>
+                                        <li><a href="@{@path}engineer/all">ดูรายชื่อช่างซ่อม</a></li>
+                                    </ul>
+                                </li>
+                                <li id="li_job">
+                                    <a>งาน<span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu" id="ul_job">
+                                        <li><a href="@{@path}job/all">งานทั้งหมด</a></li>
+                                    </ul>
+                                </li>
+                                <li id="li_notification">
+                                    <a>การแจ้งเตือน<span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu" id="ul_notification">
+                                        <li><a href="@{@path}notification/create">ส่งข้อความแจ้งเตือน</a></li>
+                                        <li><a href="@{@path}notification/all">ดูข้อความแจ้งเตือนทั้งหมด</a></li>
+                                    </ul>
+                                </li>
+                                <li id="li_report">
+                                    <a>รายงาน<span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu" id="ul_report">
+                                        <li><a href="@{@path}report/index">รายงาน</a></li>
+                                        <li><a href="@{@path}report/chart">กราฟ</a></li>
+                                    </ul>
+                                </li>
+
+                                <li id="li_survey">
+                                    <a>แบบสอบถาม<span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu" id="ul_report">
+                                        <li><a href="@{@path}survey/all">แบบสอบถามทั้งหมด</a></li>
+                                        @if (ViewBag.roleUser)
+                                        {
+                                            <li><a href="@{@path}survey/index">ตั้งค่าคำถาม</a></li>
+                                            <li><a href="@{@path}survey/negative">ตั้งค่าการคัดกรอง</a></li>
+                                        }
+                                    </ul>
+                                </li>
+                                @if (ViewBag.roleUser)
+                                {
+                                    <li id="li_job">
+                                        <a>แดชบอร์ด<span class="fa fa-chevron-down"></span></a>
+                                        <ul class="nav child_menu" id="ul_dash">
+                                            <li><a href="@{@path}dashboard/survey">แดชบอร์ดแบบสอบถาม</a></li>
+                                            <li><a href="@{@path}dashboard/jobs">แดชบอร์ดงาน</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <li id="li_user">
+                                        <a>ตั้งค่า<span class="fa fa-chevron-down"></span></a>
+                                        <ul class="nav child_menu" id="ul_user">
+                                            <li><a href="@{@path}Member/adduser">เพิ่มผู้ดูแลระบบ</a></li>
+                                            <li><a href="@{@path}Member/all">กำหนดสิทธิ์ผู้ดูแล</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <li id="li_app"><a href="@{@path}login/app">เลือกแอพ</a></li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- /sidebar menu -->
+                </div>
+            </div>
+            <!-- top navigation -->
+            <div class="top_nav">
+                <div class="nav_menu">
+                    <nav>
+                        <div class="navbar-search">
+                            <div class="input-group">
+                            </div>
+                        </div>
+                        <div class="nav navbar-nav navbar-right">
+                            <div class="dropdown-profile">
+                                <li class=" ">
+                                    <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                        <img src="@{@path}assets/images/Engineer_tracking.jpg" alt="">@ViewBag.name
+                                        <i class="fa fa-angle-down"></i><br />
+                                        <span>@(ViewBag.roleUser ? "Admin" : "Site")</span>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-usermenu pull-right">
+                                        <li><a onclick="logout()"><i class="fa fa-sign-out pull-right"></i> ลงชื่อออก</a></li>
+                                    </ul>
+                                </li>
+                            </div>
+                            <div class="message-notifications">
+                                <li role="presentation" class="dropdown">
+                                    <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa fa-bell-o"></i>
+                                        <span class="badge bg-green" id="pic_count_noti"></span>
+                                    </a>
+                                    <ul id="menu1" class="dropdown-menu list-unstyled msg_list" role="menu">
+                                        <div class="head-notifications">
+                                            <a>
+                                                <span class="head-message">
+                                                    การแจ้งเตือน <span>
+                                                        <span class="number-notifications" id="count_noti"></span><br />
+                                                        <span class="title-message" id="count_isRead"></span>
+                                            </a>
+                                        </div>
+                                        <div class="scrollbar-notifications" id="style-1">
+                                        </div>
+                                        <li class="all-notifications">
+                                            <a href="@{@path}notification/all_notification">
+                                                <strong>ดูการแจ้งเตือนทั้งหมด</strong>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+                                </li>
+                            </div>
+
+                        </div>
+                    </nav>
+                </div>
+            </div>
+            <!-- /top navigation -->
+            <!-- page content -->
+            <div class="right_col" role="main">
+                @RenderBody()
+                <div class="clearfix"></div>
+                <!-- Modal -->
+                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                            </div>
+                            <div class="modal-body">
+                                ...
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /page content -->
+            <footer>
+                <span>Copyright© 1995-2019 SAMSUNG All Rights Reserved.</span><br>
+                เว็ปไซต์สามารถใช้งานได้ดีกับ <span>Microsoft Internet Explorer 9</span> ขึ้นไป หรือ <span>Google Chome / Firefox</span> เวอร์ชั่นล่าสุด<br />
+                <span>Build V.1.0.0.2</span>
+            </footer>
+        </div>
+    </div>
+    <!-- jQuery -->
+    <script src="@{@path}assets/vendors/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="@{@path}assets/js/bootstrap.min.js"></script>
+    <!-- FastClick -->
+    <script src="@{@path}assets/vendors/fastclick/lib/fastclick.js"></script>
+    <!-- NProgress -->
+    <script src="@{@path}assets/vendors/nprogress/nprogress.js"></script>
+    <!-- bootstrap-progressbar -->
+    <script src="@{@path}assets/vendors/bootstrap-progressbar/bootstrap-progressbar.min.js"></script>
+    <!-- iCheck -->
+    @*<script src="../assets/vendors/iCheck/icheck.min.js"></script>*@
+    <!-- bootstrap-daterangepicker -->
+    <script src="@{@path}assets/vendors/moment/min/moment.min.js"></script>
+    <script src="@{@path}assets/vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="@{@path}assets/vendors/bootstrap-daterangepicker/daterangepicker.js"></script>
+    <!-- bootstrap-wysiwyg -->
+    <script src="@{@path}assets/vendors/bootstrap-wysiwyg/js/bootstrap-wysiwyg.min.js"></script>
+    <script src="@{@path}assets/vendors/jquery.hotkeys/jquery.hotkeys.js"></script>
+    <script src="@{@path}assets/vendors/google-code-prettify/src/prettify.js"></script>
+    <!-- jQuery Tags Input -->
+    <script src="@{@path}assets/vendors/jquery.tagsinput/src/jquery.tagsinput.js"></script>
+    <!-- Switchery -->
+    <script src="@{@path}assets/vendors/switchery/dist/switchery.min.js"></script>
+    <!-- Select2 -->
+    <script src="@{@path}assets/vendors/select2/dist/js/select2.full.min.js"></script>
+    <!-- jQuery custom content scroller -->
+    @*<script src="@{@path}assets/js/jquery.mCustomScrollbar.concat.min.js"></script>*@
+    <!-- Parsley -->
+    <script src="@{@path}assets/vendors/parsleyjs/dist/parsley.min.js"></script>
+    <!-- lightbox  -->
+    <link href='@{@path}assets/js/simplelightbox-master/simplelightbox.css' rel='stylesheet' type='text/css'>
+    <script type="text/javascript" src="@{@path}assets/js/simplelightbox-master/simple-lightbox.js"></script>
+    <!-- matchheight -->
+    <script type="text/javascript" src="@{@path}assets/js/jquery.matchHeight-min.js"></script>
+    <!-- Autosize -->
+    <script src="@{@path}assets/vendors/autosize/dist/autosize.min.js"></script>
+    <!-- jQuery autocomplete -->
+    <script src="@{@path}assets/vendors/devbridge-autocomplete/dist/jquery.autocomplete.min.js"></script>
+    <!-- starrr -->
+    <script src="@{@path}assets/vendors/starrr/dist/starrr.js"></script>
+    <!-- PNotify -->
+    <script src="@{@path}assets/vendors/pnotify/dist/pnotify.js"></script>
+    <script src="@{@path}assets/vendors/pnotify/dist/pnotify.buttons.js"></script>
+    <script src="@{@path}assets/vendors/pnotify/dist/pnotify.nonblock.js"></script>
+
+
+    <!--Chart-->
+    @*<script src="@{@path}assets/vendors/Chart.js/dist/Chart.min.js" rel="stylesheet"></script>*@
+
+    <!-- Dropzone.js -->
+    <script src="@{@path}assets/css/dropzone/dist/min/dropzone.min.js"></script>
+    <!-- Custom Theme Scripts -->
+    <script src="@{@path}assets/js/custom.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.1.1/firebase.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <script>
+        var base_url = '@{@path}';
+        var save_data = [];
+        var firebaseConfig = {
+            apiKey: '@{@firebase_apikey}',
+            authDomain: '@{@firebase_authdomain}',
+            databaseURL: '@{@firebase_databaseURL}',
+            projectId: '@{@firebase_projectId}',
+            storageBucket: '@{@firebase_storageBucket}',
+            messagingSenderId: '@{@firebase_messagingSenderID}',
+            appID: '@{@firebase_appID}'
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        var first_load = true;
+        var first_page = true;
+        var ref = firebase.database().ref().child('notifications');
+        var data_fire_admin = null;
+        var data_fire_site = null;
+        var url_site = "";
+        $(document).ready(function () {
+            var check_active = window.location.pathname.toString().toLowerCase();
+            if (check_active == "/engineer/add" || check_active == "/engineer/edit" || check_active == "/site/add" || check_active == "/site/edit") {
+                document.getElementById('ul_site_and_engineer').style.display = "block";
+                $("#li_site_and_engineer").addClass("active");
+            }
+            else if (check_active == "/job/edit") {
+                document.getElementById('ul_job').style.display = "block";
+                $("#li_job").addClass("active");
+            } else if (check_active == "/member/edit") {
+                document.getElementById('ul_user').style.display = "block";
+                $("#li_user").addClass("active");
+            } else if (check_active == "/notification/edit") {
+                document.getElementById('ul_notification').style.display = "block";
+                $("#li_notification").addClass("active");
+            } else if (check_active == "/category/editcategory" || check_active == "/category/editsub" || check_active == "/category/addsub") {
+                document.getElementById('ul_category').style.display = "block";
+                $("#li_category").addClass("active");
+            } else if (check_active == "/report/index" || check_active == "/report/chart") {
+                document.getElementById('ul_report').style.display = "block";
+                $("#li_report").addClass("active");
+            } else if (check_active == "/realtime/index") {
+                $("#li_realtime").addClass("active");
+            }
+
+            firebase.auth().onAuthStateChanged(function (user) {
+                if (user) {
+                    getDataFirebase();
+                } else {
+                    $.get(base_url + "Login/EncodeToken", function (res) {
+                        firebase.auth().signInWithCustomToken(res).then(function (f) {
+                            getDataFirebase();
+                        }).catch(function (error) {
+                        });
+                    });
+
+                }
+            });
+
+        });
+
+        function getDataFirebase() {
+            @if (User.IsInRole("admin"))
+            {
+                <text>
+                     ref.on('value', function (snapshot) {
+                        noti(first_page);
+                        $("#style-1").html("");
+                        var data = snapshot.val()
+                        var html = '';
+                        var count_noti = 0;
+                        var count_isRead = 0;
+                        var sortTime_data_admin = [];
+                        data_fire_admin = snapshot.val();
+
+                         $.each(data, function (idx, val) {
+                             $.each(val, function (idx2, val2) {
+                                 sortTime_data_admin.push(val2);
+                             })
+                         });
+
+                         sortTime_data_admin = sortTime_data_admin.sort(function (a, b) {
+                             return new Date(b.update_date) - new Date(a.update_date);
+                         })
+
+                         save_data = [];
+
+                         $.each(sortTime_data_admin, function (idx2, val2) {
+                             var today = new Date();
+                             var date = new Date(val2.update_date);
+                             var seconds = (today - date);
+                             var diffHrs = Math.floor((seconds % 86400000) / 3600000); // hours
+                             var diffMins = Math.round(((seconds % 86400000) % 3600000) / 60000); // minutes
+                             var minute = diffHrs != 0 ? diffHrs + " ชั่วโมง " + diffMins : diffMins;
+                             var style_read = val2.is_admin_read == 0 ? " active" : "";
+
+                             html += '<li class="title-notifications' + style_read + '">'
+                             html += '<a onClick="readNoti(\'' + true + '\',\'' + val2.url_noti + '\',\'' + val2.id + '\',\'' + val2.site_id + '\',\'' + val2.noti_guid + '\')">'
+                             html += '<span class="image"><img src="' + '@{@path}' + 'assets/images/ico/messenger-ico.png" alt="Message Notifications Image" /></span>'
+                             html += '<span>'
+                             html += '<span class="h-message">' + val2.header + '</span>'
+                             html += '</span>'
+                             html += '<span class="message" style="margin-top:3%;">'
+                             html += val2.detail
+                             html += '<span class="send-message">ตอบกลับทันที</span>'
+                             html += '</span>'
+                             html += '<span class="time">' + minute + ' นาทีที่แล้ว</span>'
+                             html += '</a>'
+                             html += '</li>'
+                             count_noti++;
+                             val2.is_admin_read == 0 ? count_isRead++ : count_isRead;
+                             save_data.push(val2);
+                         });
+                         document.getElementById('count_noti').innerHTML = count_noti;
+                         document.getElementById('pic_count_noti').innerHTML = count_isRead;
+                         document.getElementById('count_isRead').innerHTML = 'คุณมี ' + count_isRead + ' ข้อความที่ยังไม่ได้อ่าน';
+                         $("#style-1").append(html);
+
+                         first_page = false;
+                     });
+                </text>
+            }
+            else
+            {
+                <text>
+                     $.ajax({
+                         url: base_url + "Standard/firebaseUrl",
+                        type: "POST",
+                         success: function (val) {
+                             if (val.status == 1) {
+                                 url_site = val.url;
+                                var path = val.url;
+                                 var data = firebase.database().ref().child(path);
+
+                                 data.on('value', function (snapshot) {
+                                    noti(first_page);
+                                    $("#style-1").html("");
+                                    var data = snapshot.val()
+                                    var html = '';
+                                    var count_noti = 0;
+                                    var count_isRead = 0;
+                                    var sortTime_data_site = [];
+                                    data_fire_site = snapshot.val();
+
+                                    $.each(data, function (idx, val) {
+                                        sortTime_data_site.push(val);
+                                    });
+
+                                    sortTime_data_site = sortTime_data_site.sort(function (a, b) {
+                                        return new Date(b.update_date) - new Date(a.update_date);
+                                    })
+
+                                    save_data = [];
+
+                                    $.each(sortTime_data_site, function (idx2, val2) {
+                                        var today = new Date();
+                                        var date = new Date(val2.update_date);
+                                        var seconds = (today - date);
+                                        var diffHrs = Math.floor((seconds % 86400000) / 3600000); // hours
+                                        var diffMins = Math.round(((seconds % 86400000) % 3600000) / 60000); // minutes
+                                        var minute = diffHrs != 0 ? diffHrs + " ชั่วโมง " + diffMins : diffMins;
+                                        var style_read = val2.is_read == 0 ? " active" : "";
+                                        html += '<li class="title-notifications' + style_read + '">'
+                                        html += '<a onClick="readNoti(\'' + false + '\',\'' + val2.url_noti + '\',\'' + val2.id + '\',\'' + val2.site_id + '\',\'' + val2.noti_guid + '\')">'
+                                        html += '<span class="image"><img src="' + '@{@path}' + 'assets/images/ico/messenger-ico.png" alt="Message Notifications Image" /></span>'
+                                        html += '<span>'
+                                        html += '<span class="h-message">' + val2.header + '</span>'
+                                        html += '</span>'
+                                        html += '<span class="message" style="margin-top:3%;">'
+                                        html += val2.detail
+                                        html += '<span class="send-message">ตอบกลับทันที</span>'
+                                        html += '</span>'
+                                        html += '<span class="time">' + minute + ' นาทีที่แล้ว</span>'
+                                        html += '</a>'
+                                        html += '</li>'
+                                        count_noti++;
+                                        val2.is_read == 0 ? count_isRead++ : count_isRead;
+                                        save_data.push(val2);
+                                    });
+                                    document.getElementById('count_noti').innerHTML = count_noti;
+                                    document.getElementById('pic_count_noti').innerHTML = count_isRead;
+                                    document.getElementById('count_isRead').innerHTML = 'คุณมี ' + count_isRead + ' ข้อความที่ยังไม่ได้อ่าน';
+                                    $("#style-1").append(html);
+
+                                    first_page = false;
+                                });
+                            }
+                        },
+                        error: function (err) {
+
+                        }
+                    });
+
+
+                </text>
+            }
+        }
+
+        function noti(first_page) {
+            if (!first_page) {
+                @if (User.IsInRole("admin"))
+                {
+                    <text>
+                        ref.on('child_added', function (snapshot) {
+                            var data_change = snapshot.val();
+                            $.each(data_change, function (idx, val) {
+                                var check_data = _.findWhere(save_data, { id: val.id });
+                                if (_.isUndefined(check_data)) {
+                                    new PNotify({
+                                        title: val.header,
+                                        text: val.detail,
+                                        delay: 15000,
+                                        styling: 'bootstrap3'
+                                    });
+                                }
+                            });
+                        });
+                    </text>
+                }
+                else {
+                    <text>
+                        var path = url_site;
+                        var data = firebase.database().ref().child(path);
+                        data.on('child_added', function (snapshot) {
+                            var data_change = snapshot.val();
+                            var check_data = _.findWhere(save_data, { id: data_change.id });
+                            if (_.isUndefined(check_data)) {
+                                new PNotify({
+                                    title: data_change.header,
+                                    text: data_change.detail,
+                                    delay: 15000,
+                                    styling: 'bootstrap3'
+                                });
+                            }
+                          //  });
+                        });
+                    </text>
+                }
+            }
+        }
+
+        function readNoti(isAdmin, url, id, site_id, noti_guid) {
+            var url_con = base_url + 'Notification/readNotificationAsync';
+            isAdmin = isAdmin == 'true' ? true : false;
+            var pass_idx = 0;
+
+            $.each(data_fire_admin, function (idx, val) {
+                $.each(val, function (idx2, val2) {
+                    if (val2.noti_guid.toString() == noti_guid.toString()) {
+                        pass_idx = idx2;
+                    }
+                });
+            });
+
+
+            $.each(data_fire_site, function (idx, val) {
+                if (val.noti_guid.toString() == noti_guid.toString()) {
+                    pass_idx = idx;
+                }
+            });
+
+            $.ajax({
+                url: url_con,
+                type: "POST",
+                data: { isAdmin: isAdmin, id: id,site:site_id,idx:pass_idx },
+                success: function (val) {
+                    if (val.data == "pass") {
+                        window.location.href = url;
+                    } else {
+                        location.reload();
+                    }
+                },
+                error: function (err) {
+
+                }
+            });
+        }
+
+        function logout() {
+            var url_logout = base_url + 'Login/logout';
+            firebase.auth().signOut().then(function () {
+                // Sign-out successful.
+            }).catch(function (error) {
+                // An error happened.
+            });
+            $.get(url_logout, function (res) {
+
+                //window.location.href = base_url + 'login';
+                window.location.href = base_url + 'login/logoutv2';
+            })
+
+        }
+    </script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

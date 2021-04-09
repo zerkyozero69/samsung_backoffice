@@ -1,0 +1,333 @@
+﻿
+@{
+    ViewBag.Title = "Report";
+    var count = ViewData["Count"];
+    var path = ViewData["Current_Path"].ToString();
+}
+
+<div class="content">
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h1>
+                        รายงาน
+                    </h1>
+                    <div class="x_content table_tools">
+                        <div class="row">
+                            <div class="form-group">
+                                <div class="search-job">
+                                    <div class="col-sm-2">
+                                        <input type="text" id="txtSearch" class="form-control" placeholder="ค้นหาจากชื่อช่าง">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-sm-4 col-xs-12">
+                                    <select class="form-control" id="selectSite">
+                                        <option value="0">ทุกศูนย์บริการ</option>
+                                        @if (ViewBag.id_store != 0)
+                                        {
+                                            foreach (var item in ((List<CommonLib.tb_store>)ViewData["All-Site"]).Where(w => w.id == ViewBag.id_store))
+                                            {
+                                                <option value="@item.id">@item.site_name</option>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            foreach (var item in (List<CommonLib.tb_store>)ViewData["All-Site"])
+                                            {
+                                                <option value="@item.id">@item.site_name</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="col-md-1 col-sm-4 col-xs-12">
+                                    <select class="form-control" id="selectCategory">
+                                        <option value="0">ทุกประเภท</option>
+                                        @foreach (var item in (List<CommonLib.tb_jobsl_category>)ViewData["All-Category"])
+                                        {
+                                            <option value="@item.id">@item.name</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="col-md-1 col-sm-4 col-xs-12">
+                                    <select class="form-control" id="selectStatus">
+                                        <option value="99">ทุกสเตตัส</option>
+                                        <option value="0">Assigned</option>
+                                        <option value="2">Pending</option>
+                                        <option value="3">Completed</option>
+                                        <option value="4">Cancel</option>
+                                        <option value="6">Procress</option>
+                                        <option value="7">Start Job</option>
+                                        <option value="8">Start Repair</option>
+                                        <option value="9">Job Delay</option>
+                                        <option value="10">Over Time</option>
+                                    </select>
+                                </div>
+
+                                <div class="filter-job">
+                                    <div class="col-sm-2">
+                                        @{
+                                            var start_date = DateTime.Today.AddDays(-7);
+                                            <input type="text" value="@start_date.ToString("dd/MM/yyyy")" class="form-control start-date-input" placeholder="วันที่เริ่มงาน" id="single_cal2">
+                                        }
+                                    </div>
+                                    <div class="col-sm-2">
+                                        @{
+                                            var end_date = DateTime.Today;
+                                            <input type="text" value="@end_date.ToString("dd/MM/yyyy")" class="form-control end-date-input" placeholder="วันที่จบงาน" id="single_cal3">
+                                        }
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <a onclick="btn_search()" class="tableview">
+                                            ค้นหา
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="filter-job">
+                                    <div class="col-sm-1">
+                                        <a onclick="export_file()" class="  btn_export">
+                                            Export
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <div class="table-tabs">
+                <div class="tab-content">
+                    <table class="table main-table">
+                        <thead>
+                            <tr>
+                                <th>Code SVC</th>
+                                <th>ชื่อศูนย์บริการ</th>
+                                <th>รวมงานทั้งหมด</th>
+                                <th>รวมงานที่เสร็จ</th>
+                                <th>รวมงานที่รอดำเนินการ</th>
+                                <th>รวมงานที่ยกเลิก</th>
+                                <th>รวม Prefer Date</th>
+                                <th>รวมงานล่าช้า</th>
+                                <th>รวมส่ง sms</th>
+                                <th>รวมเปิดลิงค์</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyData">
+                            @{int count_report = 0;}
+                            @foreach (var item in (List<s_tracking_mobile.Models.report>)ViewData["Data"])
+                            {
+                                <tr>
+                                    <td>@item.site_code</td>
+                                    <td>@item.site_name</td>
+                                    <td>@item.count_job</td>
+                                    <td>@item.all_done_job</td>
+                                    <td>@item.all_pending</td>
+                                    <td>@item.all_cancel_job</td>
+                                    <td>@item.all_perfer</td>
+                                    <td>@item.all_delay</td>
+                                    <td>@item.all_sms_engineer</td>
+                                    <td>@item.all_sms_customer</td>
+                                    <td class="toggle-table-child">
+                                        <a class="open" href="">
+                                            <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr id="@count_report" class="minor-table">
+                                    <td colspan="9" style="padding: 0;">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>ชื่อช่าง</th>
+                                                    <th>รหัสช่าง</th>
+                                                    <th>งานทั้งหมด</th>
+                                                    <th>งานที่เสร็จสิ้น</th>
+                                                    <th>งานที่รอดำเนินการ</th>
+                                                    <th>งานยกเลิก</th>
+                                                    <th>Prefer Date</th>
+                                                    <th>งานล่าช้า</th>
+                                                    <th>ส่ง sms</th>
+                                                    <th>เปิดลิงค์</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var item2 in item.list_engineer)
+                                                {
+                                                    <tr>
+                                                        <td>@item2.engineer_name</td>
+                                                        <td>@item2.engineer_code</td>
+                                                        <td>@item2.all_job</td>
+                                                        <td>@item2.done_job</td>
+                                                        <td>@item2.peding_job</td>
+                                                        <td>@item2.cancel_job</td>
+                                                        <td>@item2.perfer_date</td>
+                                                        <td>@item2.delay_job</td>
+                                                        <td>@item2.sms_engineer</td>
+                                                        <td>@item2.sms_customer</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                count_report++;
+                            }
+                        </tbody>
+                    </table>
+                    <div class="clearfix"></div>
+                    <nav aria-label="Page navigation" id="datatable_paginate">
+                        <ul class="pagination"></ul>
+                    </nav>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section header {
+
+}
+@section scripts {
+    <script>
+        var base_url = '@{@path}';
+        $(document).ready(function () {
+
+            for (var i = 0; i <= @count_report ; i++) {
+                $("#" + i.toString()).removeClass('collaped');
+            }
+
+            pagination(@count, 1);
+        });
+
+        function btn_search() {
+            setdata(1);
+        }
+
+        function setdata(page) {
+            var search = document.getElementById('txtSearch').value;
+            var site = document.getElementById('selectSite').value;
+            var status = document.getElementById('selectStatus').value;
+            var category = document.getElementById('selectCategory').value;
+            var s_start_date = document.getElementById('single_cal2').value;
+            var s_end_date = document.getElementById('single_cal3').value;
+            $("#tbodyData").html("");
+            search = search.trim();
+            $.get(base_url + "report/GetData", { first: false, search: search.toString(), site: site, category: category, status: status, s_start_date: s_start_date, s_end_date: s_end_date, page: page, chart: false }, function (res) {
+                if (res.length > 0) {
+                    //pagination
+                    $('.pagination').html("");
+                    var count = res[res.length - 1].count;
+                    pagination(count, page);
+                    var html = '';
+                    $.each(res, function (idx, val) {
+                        if (val.site_name != null) {
+                            html += '<tr>';
+                            html += '<td>' + val.site_code + '</td>';
+                            html += '<td>' + val.site_name + '</td>';
+                            html += '<td>' + val.count_job + '</td>';
+                            html += '<td>' + val.all_done_job + '</td>';
+                            html += '<td>' + val.all_pending + '</td>';
+                            html += '<td>' + val.all_cancel_job + '</td>';
+                            html += '<td>' + val.all_perfer + '</td>';
+                            html += '<td>' + val.all_delay + '</td>';
+                            html += '<td>' + val.all_sms_engineer + '</td>'; //change
+                            html += '<td>' + val.all_sms_customer + '</td>'; //change
+                            html += '<td class="toggle-table-child"><a class="open" href=""><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></td>';
+                            html += '</tr>';
+                            html += '<tr class="minor-table">';
+                            html += '<td colspan="9" style="padding: 0;">';
+                            html += '<table class="table table-striped">';
+                            html += '<thead>';
+                            html += '<tr><th>ชื่อช่าง</th><th>รหัสช่าง</th><th>งานทั้งหมด</th><th>งานที่เสร็จสิ้น</th><th>งานที่รอดำเนินการ</th><th>งานยกเลิก</th><th>Prefer Date</th><th>งานล่าช้า</th><th>ส่ง sms</th><th>เปิดลิงค์</th></tr>';
+                            html += '</thead>';
+                            html += '<tbody>';
+                            $.each(val.list_engineer, function (idx2, val2) {
+                                html += '<tr>';
+                                html += '<td>' + val2.engineer_name + '</td>';
+                                html += '<td>' + val2.engineer_code + '</td>';
+                                html += '<td>' + val2.all_job + '</td>';
+                                html += '<td>' + val2.done_job + '</td>';
+                                html += '<td>' + val2.peding_job + '</td>';
+                                html += '<td>' + val2.cancel_job + '</td>';
+                                html += '<td>' + val2.perfer_date + '</td>';
+                                html += '<td>' + val2.delay_job + '</td>';
+                                html += '<td>' + val2.sms_engineer + '</td>'; //change
+                                html += '<td>' + val2.sms_customer + '</td>'; //change
+                                html += '</tr>';
+                            });
+                            html += '</tbody>';
+                            html += '</table>';
+                            html += '</td>';
+                            html += '</tr>';
+                        }
+                    });
+                    $("#tbodyData").append(html);
+
+                    $('.toggle-table-child a').click(function (e) {
+                        e.preventDefault();
+                        $(this).toggleClass('open');
+                        $(this).parent().parent().next().toggleClass('collaped');
+                        $(this).parent().parent().toggleClass('open');
+                    });
+                } else {
+                    $('.pagination').html("");
+                    var html = '';
+                    html += '<tr><td rowspan="2"><center>ไม่มีรายงานที่ค้นหา</center></tr>'
+                    $("#tbodyData").append(html);
+                }
+            });
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+        }
+
+        function pagination(count, page) {
+            var count = count;
+            var html = "";
+            var count_page = 0;
+            $('.pagination').html("");
+            if (count > 0) {
+                var style_back = page == 1 ? "pointer-events: none;" : "";
+                html += '<li style="' + style_back + '"><a onClick="click_back()" aria-label="Previous"><span aria-hidden="true"><span class="glyphicon glyphicon-menu-left"></span></span></a></li>'
+                for (i = 0; i <= count; i += 20) {
+                    count_page++;
+                    var style = count_page == page ? 'active' : '';
+                    html += '<li data-page="' + count_page + '" class="paginate_button ' + style + '"><a onClick="click_page(\'' + count_page + '\')" aria-controls="datatable" tabindex="0">' + count_page + '</a></li>';
+                }
+                var style_next = count_page == page ? "pointer-events: none;" : "";
+                html += '<li style="' + style_next + '"><a onClick="click_next()" aria-label="Next"><span aria-hidden="true"><span class="glyphicon glyphicon-menu-right"></span></span></a></li>'
+                $('.pagination').append(html);
+            }
+        }
+
+        function click_back() {
+            var page = $('ul.pagination').find('li.active').data('page');
+            setdata((page - 1));
+        }
+
+        function click_next() {
+            var page = $('ul.pagination').find('li.active').data('page');
+            setdata((page + 1));
+        }
+
+        function click_page(page) {
+            setdata(page);
+        }
+
+        function export_file() {
+            var search = document.getElementById('txtSearch').value;
+            var site = document.getElementById('selectSite').value;
+            var status = document.getElementById('selectStatus').value;
+            var category = document.getElementById('selectCategory').value;
+            var s_start_date = document.getElementById('single_cal2').value;
+            var s_end_date = document.getElementById('single_cal3').value;
+            window.open(
+                base_url + 'export/export_file?id=4&search=' + search + '&site=' + site + '&status=' + status + '&category=' + category + '&s_start_date=' + s_start_date + '&s_end_date=' + s_end_date ,
+                '_blank'
+            );
+        }
+
+    </script>
+}

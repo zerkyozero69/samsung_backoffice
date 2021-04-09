@@ -1,0 +1,164 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Directions Service (Complex)</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 425px;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #floating-panel {
+        position: absolute;
+        top: 10px;
+        left: 25%;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+        text-align: center;
+        font-family: 'Roboto','sans-serif';
+        line-height: 30px;
+        padding-left: 10px;
+      }
+      #warnings-panel {
+        width: 100%;
+        height:10%;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="floating-panel">
+    <b>Start / End </b>
+    <div >
+        <input id="latlng" type="text" value="13.7468204,100.5328803">
+        <input id="latlng2" type="text" value="13.8140896,100.5469363">
+        <input id="submit" type="button" value="Send Start/End Location">
+      </div>
+    </div>
+    <div id="map"></div>
+    &nbsp;
+    <div id="warnings-panel"></div>
+    <div id="output"></div>
+    <script>
+      function initMap() {
+        var markerArray = [];
+
+        // Instantiate a directions service.
+        var directionsService = new google.maps.DirectionsService;
+
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 17,
+          center: {lat: 13.7468204, lng: 100.5328803}
+        });
+
+        var directionsDisplay = new google.maps.DirectionsRenderer({map: map});
+        directionsDisplay.setMap(map);
+        directionsDisplay.setOptions( { 
+          suppressMarkers: true ,
+          polylineOptions: {
+            strokeWeight: 5,
+            strokeOpacity: 0.8,
+            strokeColor:  '#1428a0' 
+          }
+          
+          } );
+
+      //var geocoder = new google.maps.Geocoder;
+      //var service = new google.maps.DistanceMatrixService;
+
+        document.getElementById('submit').addEventListener('click', function() {
+          var input = document.getElementById('latlng').value;
+          var latlngStr = input.split(',', 2);
+          var latlng = {lat: parseFloat(latlngStr[0]), lng: parseFloat(latlngStr[1])};
+          var input2 = document.getElementById('latlng2').value;
+          var latlngStr2 = input2.split(',', 2);
+          var latlng2 = {lat: parseFloat(latlngStr2[0]), lng: parseFloat(latlngStr2[1])};
+
+          calculateAndDisplayRoute(directionsDisplay, directionsService, latlng, latlng2, map);
+
+        });
+      }
+
+      function calculateAndDisplayRoute(directionsDisplay, directionsService,_origin, _destination, map) {
+
+        createMarker(_origin , "Start" , "https://s-tracking.byi-vm.space/assets/images/icons/Engineer-blue-non.png");
+        createMarker(_destination , "Stop" , "https://s-tracking.byi-vm.space/assets/images/icons/Customer-blue-non.png");
+
+        directionsService.route({
+          origin: _origin,
+          destination: _destination,
+          travelMode: 'DRIVING',
+          drivingOptions: {
+            departureTime: new Date(/* now, or future date */),
+            trafficModel: 'pessimistic'
+        },
+        }, function(response, status) {
+          // Route the directions and pass the response to a function to create
+          // markers for each step.
+          
+          if (status === 'OK') {
+            document.getElementById('warnings-panel').innerHTML =
+                '<b>' + response.routes[0].warnings + '</b>';
+            directionsDisplay.setDirections(response);
+            console.log(response);
+            console.log("response ", response.routes[0]);
+            document.getElementById('output').innerHTML =
+            'ระยะทาง <b>' + response.routes[0].legs[0].distance.text + '</b>' +
+            '<b>' + response.routes[0].legs[0].duration.text + '</b>';
+          } else {
+            window.alert('Directions request failed due to ' + status);
+          }
+        });
+
+        function createMarker(latlng, title , _icon) {
+
+        var marker = new google.maps.Marker({
+            position: latlng,
+            title: title,
+            icon: _icon,
+            map: map
+        });
+
+        // google.maps.event.addListener(marker, 'click', function () {
+        //     infowindow.setContent(title);
+        //     infowindow.open(map, marker);
+        // });
+        }
+        // var service = new google.maps.DistanceMatrixService;
+        
+        // service.getDistanceMatrix({
+        //   origins: [_origin],
+        //   destinations: [ _destination],
+        //   travelMode: 'DRIVING',
+        //   unitSystem: google.maps.UnitSystem.METRIC,
+        //   avoidHighways: false,
+        //   avoidTolls: false
+        // }, function(response, status) {
+        //   if (status !== 'OK') {
+        //     alert('Error was: ' + status);
+        //   } else {
+        //     var originList = response.originAddresses;
+        //     var destinationList = response.destinationAddresses;
+
+        //     var results = response.rows[0].elements;
+        //     console.log("duration no traffic : ", results[0].duration.text);
+        //   }
+        // });
+      }
+
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyATUVaqxBiIu_MoMQdjDbo7Glb9c-6U5ZU&callback=initMap">
+    </script>
+  </body>
+</html>

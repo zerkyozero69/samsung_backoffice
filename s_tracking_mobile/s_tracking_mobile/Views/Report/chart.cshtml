@@ -1,0 +1,449 @@
+﻿@using System.Configuration;
+@{
+    ViewBag.Title = "Chart";
+    var path = ViewData["Current_Path"].ToString();
+    string base_url = ConfigurationManager.AppSettings["Base_URL"];
+}
+<script src="@{@base_url}assets/vendors/Chart.js/dist/Chart.min.js" rel="stylesheet"></script>
+<div class="content">
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h1>
+                        กราฟ
+                    </h1>
+                    <div class="x_content table_tools">
+                        <div class="row">
+                            <div class="form-group">
+                                <div class="search-job">
+                                    <div class="col-sm-2">
+                                        <input type="text" id="txtSearch" class="form-control" placeholder="ค้นหาจากชื่อช่าง">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-sm-4 col-xs-12">
+                                    <select class="form-control" id="selectSite">
+                                        <option value="0">ทุกศูนย์บริการ</option>
+                                        @if (ViewBag.id_store != 0)
+                                        {
+                                            foreach (var item in ((List<CommonLib.tb_store>)ViewData["All-Site"]).Where(w => w.id == ViewBag.id_store))
+                                            {
+                                                <option value="@item.id">@item.site_name</option>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            foreach (var item in (List<CommonLib.tb_store>)ViewData["All-Site"])
+                                            {
+                                                <option value="@item.id">@item.site_name</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-1 col-sm-4 col-xs-12">
+                                    <select class="form-control" id="selectCategory">
+                                        <option value="0">ทุกประเภท</option>
+                                        @foreach (var item in (List<CommonLib.tb_jobsl_category>)ViewData["All-Category"])
+                                        {
+                                            <option value="@item.id">@item.name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-1 col-sm-4 col-xs-12">
+                                    <select class="form-control" id="selectStatus">
+                                        <option value="99">ทุกสเตตัส</option>
+                                        <option value="0">Assigned</option>
+                                        <option value="2">Pending</option>
+                                        <option value="3">Completed</option>
+                                        <option value="4">Cancel</option>
+                                        <option value="6">Procress</option>
+                                        <option value="7">Start Job</option>
+                                        <option value="8">Start Repair</option>
+                                        <option value="9">Job Delay</option>
+                                        <option value="10">Over Time</option>
+                                    </select>
+                                </div>
+                                <div class="filter-job">
+                                    <div class="col-sm-2">
+                                        @{
+                                            var start_date = DateTime.Today.AddDays(-7);
+                                            <input type="text" value="@start_date.ToString("dd/MM/yyyy")" class="form-control start-date-input" placeholder="วันที่เริ่มงาน" id="single_cal2">
+                                        }
+                                    </div>
+                                    <div class="col-sm-2">
+                                        @{
+                                            var end_date = DateTime.Today;
+                                            <input type="text" value="@end_date.ToString("dd/MM/yyyy")" class="form-control end-date-input" placeholder="วันที่จบงาน" id="single_cal3">
+                                        }
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <a onclick="btn_search()" class="tableview">
+                                            ค้นหา
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <div class="table-tabs">
+                <div id="chart_content" class="tab-content">
+                    <!--Content-->
+                    @if (ViewBag.roleUser)
+                    {
+                        <canvas id="myChart"></canvas>
+                        <div class="clearfix"></div>
+                    }
+                    <div class="tab-content" id="engineer">
+                    </div>
+                    <!--/Content-->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section header {
+}
+@section scripts {
+    <script>
+        var base_url = '@{@path}';
+        var labelsite = [], site_countjob = [], site_donejob = [],site_pending = [], site_canceljob = [], site_perfer = [], site_delay = [];
+        var label_en_site = [], code_site = [], labelengieer = [], engieer_alljob = [], engieer_donejob = [], engineer_pendingjob = [], engieer_canceljob = [], engieer_perfer = [], engieer_delay = [];
+
+        $(document).ready(function () {
+            Chart.defaults.groupableBar = Chart.helpers.clone(Chart.defaults.bar);
+            var helpers = Chart.helpers;
+            Chart.controllers.groupableBar = Chart.controllers.bar.extend({
+                calculateBarX: function (index, datasetIndex) {
+                    // position the bars based on the stack index
+                    var stackIndex = this.getMeta().stackIndex;
+                    return Chart.controllers.bar.prototype.calculateBarX.apply(this, [index, stackIndex]);
+                },
+
+                hideOtherStacks: function (datasetIndex) {
+                    var meta = this.getMeta();
+                    var stackIndex = meta.stackIndex;
+
+                    this.hiddens = [];
+                    for (var i = 0; i < datasetIndex; i++) {
+                        var dsMeta = this.chart.getDatasetMeta(i);
+                        if (dsMeta.stackIndex !== stackIndex) {
+                            this.hiddens.push(dsMeta.hidden);
+                            dsMeta.hidden = true;
+                        }
+                    }
+                },
+
+                unhideOtherStacks: function (datasetIndex) {
+                    var meta = this.getMeta();
+                    var stackIndex = meta.stackIndex;
+
+                    for (var i = 0; i < datasetIndex; i++) {
+                        var dsMeta = this.chart.getDatasetMeta(i);
+                        if (dsMeta.stackIndex !== stackIndex) {
+                            dsMeta.hidden = this.hiddens.unshift();
+                        }
+                    }
+                },
+
+                calculateBarY: function (index, datasetIndex) {
+                    this.hideOtherStacks(datasetIndex);
+                    var barY = Chart.controllers.bar.prototype.calculateBarY.apply(this, [index, datasetIndex]);
+                    this.unhideOtherStacks(datasetIndex);
+                    return barY;
+                },
+
+                calculateBarBase: function (datasetIndex, index) {
+                    this.hideOtherStacks(datasetIndex);
+                    var barBase = Chart.controllers.bar.prototype.calculateBarBase.apply(this, [datasetIndex, index]);
+                    this.unhideOtherStacks(datasetIndex);
+                    return barBase;
+                },
+
+                getBarCount: function () {
+                    var stacks = [];
+
+                    // put the stack index in the dataset meta
+                    Chart.helpers.each(this.chart.data.datasets, function (dataset, datasetIndex) {
+                        var meta = this.chart.getDatasetMeta(datasetIndex);
+                        if (meta.bar && this.chart.isDatasetVisible(datasetIndex)) {
+                            var stackIndex = stacks.indexOf(dataset.stack);
+                            if (stackIndex === -1) {
+                                stackIndex = stacks.length;
+                                stacks.push(dataset.stack);
+                            }
+                            meta.stackIndex = stackIndex;
+                        }
+                    }, this);
+
+                    this.getMeta().stacks = stacks;
+                    return stacks.length;
+                },
+            });
+
+
+            @*var data = @Html.Raw(Json.Encode((List<s_tracking_mobile.Models.report>)ViewData["Data"]));*@
+
+            var site = document.getElementById('selectSite').value;
+            var status = document.getElementById('selectStatus').value;
+            var category = document.getElementById('selectCategory').value;
+            var s_start_date = document.getElementById('single_cal2').value;
+            var s_end_date = document.getElementById('single_cal3').value;
+
+            $.get(base_url + "report/GetData", { first: false, search: "", site: site, category: category, status: status, s_start_date: s_start_date, s_end_date: s_end_date, page: 1, chart: true }, function (res) {
+                $.each(res, function (idx, val) {
+                label_en_site = [], code_site = [], labelengieer = [], engieer_alljob = [], engieer_donejob = [], engineer_pendingjob = [], engieer_canceljob = [], engieer_perfer = [], engieer_delay = [];
+                label_en_site.push(val.site_name);
+                code_site.push(val.site_code);
+                labelsite.push(val.site_name);
+                site_countjob.push(val.count_job);
+                site_donejob.push(val.all_done_job);
+                site_pending.push(val.all_pending)
+                site_canceljob.push(val.all_cancel_job);
+                site_perfer.push(val.all_perfer);
+                site_delay.push(val.all_delay);
+                $.each(val.list_engineer, function (idx2, val2) {
+                    labelengieer.push(val2.engineer_name);
+                    engieer_alljob.push(val2.all_job);
+                    engieer_donejob.push(val2.done_job);
+                    engineer_pendingjob.push(val2.peding_job)
+                    engieer_canceljob.push(val2.cancel_job);
+                    engieer_perfer.push(val2.perfer_date);
+                    engieer_delay.push(val2.delay_job);
+                });
+                createChart_all(false);
+            });
+
+             @if (User.IsInRole("admin"))
+                 {
+                     <text>
+                        createChart_all(true);
+                    </text>
+                 }
+            });
+
+
+
+
+            @*if ('@ViewBag.roleUser' == "True") {
+                createChart_all(true);
+
+            }*@
+
+        });
+
+        function btn_search() {
+            var search = document.getElementById('txtSearch').value;
+            var site = document.getElementById('selectSite').value;
+            var status = document.getElementById('selectStatus').value;
+            var category = document.getElementById('selectCategory').value;
+            var s_start_date = document.getElementById('single_cal2').value;
+            var s_end_date = document.getElementById('single_cal3').value;
+            var html = '';
+            $("#chart_content").html("");
+            search = search.toString().trim();
+            $.get(base_url + "report/GetData", { first: false, search: search, site: site, category: category, status: status, s_start_date: s_start_date, s_end_date: s_end_date, page: 1, chart: true }, function (res) {
+                //console.log(res)
+                labelsite = [], site_countjob = [], site_donejob = [], site_pending = [], site_canceljob = [], site_perfer = [], site_delay = [];
+                label_en_site = [], code_site = [], labelengieer = [], engieer_alljob = [], engieer_donejob = [], engineer_pendingjob = [], engieer_canceljob = [], engieer_perfer = [], engieer_delay = [];
+
+                 @if (User.IsInRole("admin"))
+                 {
+                     <text>
+                html += '<canvas id="myChart"></canvas>'
+                html += '<div class="clearfix"></div>'
+                $("#chart_content").append(html);
+                html = '';
+                    </text>
+                 }
+
+                @*if ('@ViewBag.roleUser' == "True") {
+                    html += '<canvas id="myChart"></canvas>'
+                    html += '<div class="clearfix"></div>'
+                    $("#chart_content").append(html);
+                    html = '';
+                }*@
+                html += '<div class="tab-content" id="engineer"></div>'
+                $("#chart_content").append(html);
+                $.each(res, function (idx, val) {
+                    label_en_site = [], code_site = [], labelengieer = [], engieer_alljob = [], engieer_donejob = [], engineer_pendingjob = [], engieer_canceljob = [], engieer_perfer = [], engieer_delay = [];
+                    label_en_site.push(val.site_name);
+                    code_site.push(val.site_code);
+                    labelsite.push(val.site_name);
+                    site_countjob.push(val.count_job);
+                    site_donejob.push(val.all_done_job);
+                    site_pending.push(val.all_pending)
+                    site_canceljob.push(val.all_cancel_job);
+                    site_perfer.push(val.all_perfer);
+                    site_delay.push(val.all_delay);
+                    $.each(val.list_engineer, function (idx2, val2) {
+                        labelengieer.push(val2.engineer_name);
+                        engieer_alljob.push(val2.all_job);
+                        engieer_donejob.push(val2.done_job);
+                        engineer_pendingjob.push(val2.peding_job)
+                        engieer_canceljob.push(val2.cancel_job);
+                        engieer_perfer.push(val2.perfer_date);
+                        engieer_delay.push(val2.delay_job);
+                    });
+                    createChart_all(false);
+                });
+
+                 @if (User.IsInRole("admin"))
+                 {
+                     <text>
+                        createChart_all(true);
+                    </text>
+                 }
+                 @*if ('@ViewBag.roleUser' == "True") {
+                     createChart_all(true);
+                 }*@
+
+            });
+        }
+
+        function createChart_all(site) {
+
+
+
+            if (site) {
+                var ctx = document.getElementById("myChart").getContext("2d");
+                new Chart(ctx, {
+                    type: 'groupableBar',
+                    data: {
+                        labels: labelsite,
+                        datasets: [
+                            {
+                                label: 'รวมงานที่เสร็จ',
+                                backgroundColor: '#77c621',
+                                data: site_donejob,
+                                stack: 1
+                            },
+                            {
+                                label: 'รวมงานที่รอดำเนินการ',
+                                backgroundColor: '#fd7923',
+                                data: site_pending,
+                                stack: 1
+                            },
+                            {
+                                label: 'รวมงานที่ยกเลิก',
+                                backgroundColor: '#e02925',
+                                data: site_canceljob,
+                                stack: 1
+                            },
+                            {
+                                label: 'รวม Prefer Date',
+                                backgroundColor: '#337ab7',
+                                data: site_perfer,
+                                stack: 2
+                            },
+                            {
+                                label: 'รวมงานล่าช้า',
+                                backgroundColor: '#ffb233',
+                                data: site_delay,
+                                stack: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        legend: {
+                            labels: {
+                                generateLabels: function (chart) {
+                                    return Chart.defaults.global.legend.labels.generateLabels.apply(this, [chart]).filter(function (item, i) {
+                                        return i <= 2;
+                                    });
+                                }
+                            }
+                        },
+                        scales: {
+                            yAxes: [{
+                                stacked: true,
+                            }],
+                            xAxes: [{
+                                    categoryPercentage: 0.1,
+                            }]
+                        },
+                        title: {
+                            display: true,
+                            text: 'ทุกศูนย์บริการ'
+                        }
+                    }
+                });
+            } else {
+                var html = '';
+                html += '<canvas id="' + code_site[0] + '"></canvas>'
+                html += '<div id="clear' + code_site[0] + '" class="clearfix"></div>'
+                html += '<br/>'
+                $("#engineer").append(html);
+
+                var ctx = document.getElementById(code_site[0]).getContext('2d');
+                var chart = new Chart(ctx, {
+                    type: 'groupableBar',
+
+                    data: {
+                        labels: labelengieer,
+                        datasets: [
+                            {
+                                label: 'งานที่เสร็จ',
+                                backgroundColor: '#77c621',
+                                stack: 1,
+                                data: engieer_donejob
+                            },
+                            {
+                                label: 'งานที่รอดำเนินการ',
+                                backgroundColor: '#fd7923',
+                                stack: 1,
+                                data: engineer_pendingjob
+                            },
+                            {
+                                label: 'งานที่ยกเลิก',
+                                backgroundColor: '#e02925',
+                                stack: 1,
+                                data: engieer_canceljob
+                            },
+                            {
+                                label: 'Prefer Date',
+                                backgroundColor: '#337ab7',
+                                stack: 2,
+                                data: engieer_perfer
+                            },
+                            {
+                                label: 'งานล่าช้า',
+                                backgroundColor: '#ffb233',
+                                stack: 2,
+                                data: engieer_delay
+                            }
+                        ]
+                    },
+
+                    options: {
+                        legend: {
+                            labels: {
+                                generateLabels: function (chart) {
+                                    return Chart.defaults.global.legend.labels.generateLabels.apply(this, [chart]).filter(function (item, i) {
+                                        return i <= 2;
+                                    });
+                                }
+                            }
+                        },
+                        scales: {
+                            yAxes: [{
+                                stacked: true,
+                            }],
+                            xAxes: [{
+                                categoryPercentage: 0.1,
+                            }]
+                        },
+                        title: {
+                            display: true,
+                            text: label_en_site[0]
+                        }
+                    }
+                });
+            }
+        }
+
+    </script>
+}

@@ -1,0 +1,229 @@
+﻿@{
+    ViewBag.Title = "index";
+    Layout = "";
+    var job = (CommonLib.tb_jobs)ViewData["job"];
+    var engineer = (CommonLib.tb_engineer)ViewData["engineer"];
+    var path = ViewData["Current_Path"];
+    var azure = ViewData["Azure_url"];
+    var key = ViewData["Key_Azure"];
+    var store = (s_tracking_mobile.Models.site)ViewData["store"];
+}
+
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width">
+
+    <title>Service Request </title>
+    <!-- Bootstrap -->
+    <link href="@path/assets/css/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="@path/assets/css/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link href="@path/assets/css/_ss_engineer_service_request.css" rel="stylesheet">
+    <script>
+        $(document).ready(function () {
+            window.print();
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="service_request">
+            <div class="header-request">
+                <div class="head-logo">
+                    <img src="@path/assets/images/logo.png">
+                    <h3>Service Request</h3>
+                </div>
+                <div class="head-address">
+                    <span>Service Center: @store.code_store - @store.store_name</span>
+                    <span>Address: @store.store_address @store.store_village @store.store_street @store.store_sub_district @store.store_district</span>
+                    <span>@store.store_province @store.store_postcode</span>
+                    <span>Contact Center: 0-2689-3232</span>
+                    <span>Toll-Free: 1800-29-3232 (สำหรับโทรศัพท์พื้นฐาน)</span>
+                    <span>Website: www.samsung.com/th</span>
+                </div>
+            </div>
+
+            <div class="tb-request">
+                <div class="tb-title">Service Request No : <span class="request-no">@job.service_order_no</span> </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Customer Name</div>
+                    <div class="inside row-two ">@job.customer_fullname</div>
+                    <div class="inside row-short">Request Date</div>
+                    <div class="inside row-short">@job.request_date</div>
+                </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Address</div>
+                    <div class="inside row-long">@job.street @job.im_district @job.im_sub_district @job.im_province</div>
+                </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Appointment Date</div>
+                    <div class="inside row-two">@job.appointment_datetime</div>
+                    <div class="inside row-short">Engineer</div>
+                    <div class="inside row-short">@engineer.engineer_name</div>
+                </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Telephone</div>
+                    <div class="inside row-two">[Home]@job.phone_home [Mobile]@job.phone_mobile</div>
+                    <div class="inside row-short">Purchase Date</div>
+                    <div class="inside row-short">@job.purchase_date</div>
+                </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Model Name</div>
+                    <div class="inside row-two">@job.model</div>
+                    <div class="inside row-short">Fax No</div>
+                    <div class="inside row-short"></div>
+                </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Serial No.(CRT/ESN/IMEI)</div>
+                    <div class="inside row-two">@job.serial_no</div>
+                    <div class="inside row-short">Service Type</div>
+                    <div class="inside row-short">@job.service_type</div>
+                </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Warranty Status</div>
+                    <div class="inside row-long">
+                        <input type="checkbox" name="Status" value="Full Warranty"> Full Warranty
+                        <input type="checkbox" name="Status" value="Labor Only"> Labor Only
+                        <input type="checkbox" name="Status" value="Parts Only"> Parts Only
+                        <input type="checkbox" name="Status" value="Out of Warranty"> Out of Warranty
+                    </div>
+                </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Repair Received</div>
+                    <div class="inside row-two"></div>
+                    <div class="inside row-short">Repair Completed</div>
+                    <div class="inside row-short">@job.job_end</div>
+                </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Goods Delivered</div>
+                    <div class="inside row-two"></div>
+                    <div class="inside row-short">Return by / Date</div>
+                    <div class="inside row-short"></div>
+                </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Defect Description</div>
+                    <div class="inside row-long">@job.defect_description</div>
+                </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Remark</div>
+                    <div class="inside row-long">@job.remark</div>
+                </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Repair Description</div>
+                    <div class="inside row-long">@job.repair_description</div>
+                </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Accessory</div>
+                    <div class="inside row-long"></div>
+                </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Condition Code</div>
+                    <div class="inside row-des-last">2</div>
+                    <div class="inside row-title-last">Symptom Code</div>
+                    <div class="inside row-des-last">AA2</div>
+                    <div class="inside row-title-last">Defect Code</div>
+                    <div class="inside row-des-last">P</div>
+                    <div class="inside row-title-last">Repair Code</div>
+                    <div class="inside row-des-last">X01</div>
+                </div>
+                <!-- เพิ่มใหม่ 8/14/2019 -->
+                <div class="tb-detail">
+                    <div class="inside row-first">Detail Of Defect</div>
+                    <div class="inside row-long">@job.description_breakdown</div>
+                </div>
+                <div class="tb-detail">
+                    <div class="inside row-first">Detail Of Parts</div>
+                    <div class="inside row-long">@job.description_parts</div>
+                </div>
+                <!-- เพิ่มใหม่ 8/14/2019 -->
+            </div>
+            <div class="tb-description">
+                <div class="header-description">
+                    <div class="table_header">No</div>
+                    <div class="table_header">Parts No</div>
+                    <div class="table_header">Description</div>
+                    <div class="table_header">Location</div>
+                    <div class="table_header">Qty</div>
+                    <div class="table_header">UnitPrice (THB)</div>
+                    <div class="table_header">Amount (THB)</div>
+                    <div class="table_header">Past Return Date</div>
+                </div>
+                @foreach (var part in (List<CommonLib.tb_jobs_parts>)ViewData["part"])
+                {
+                    <div class="tb_row detail_part">
+                        <div class="row_detail">@part.id</div>
+                        <div class="row_detail">@part.parts_no</div>
+                        <div class="row_detail">@part.parts_description</div>
+                        <div class="row_detail">@part.parts_repair_location</div>
+                        <div class="row_detail">@part.quantity</div>
+                        <div class="row_detail"></div>
+                        <div class="row_detail"></div>
+                        <div class="row_detail"></div>
+                    </div>
+                }
+            </div>
+            <div class="tb-signature">
+                <div class="divTableBody">
+                    <div class="tb-row-sign">
+                        <div class="signature-cell font-bold">I/We accept the above terms and conditions.</div>
+                        <div class="signature-cell"></div>
+                        <div class="signature-cell">Received by:</div>
+                    </div>
+                    <div class="tb-row-sign">
+                        <div class="signature-cell img-signature">
+                            @if (job.signature_name != null && job.signature_path != null)
+                            {
+                                <img src="@azure@job.signature_path@job.signature_name@key" style="width:auto; height: 50px;">
+                            }
+                        </div>
+                        <div class="signature-cell"></div>
+                        <div class="signature-cell img-signature">
+                            <img style="width:auto !important; height: 50px;">
+                        </div>
+                    </div>
+                    <div class="tb-row-sign">
+                        <div class="signature-cell">Signature of Customer</div>
+                        <div class="signature-cell"></div>
+                        <div class="signature-cell">For Samsung Customer Service</div>
+                    </div>
+                    <div class="tb-row-sign">
+                        <div class="signature-cell"></div>
+                        <div class="signature-cell"></div>
+                        <div class="signature-cell"></div>
+                    </div>
+                    <div class="tb-row-sign">
+                        <div class="signature-cell font-bold">COLLECTION OF PRODUCT</div>
+                        <div class="signature-cell"></div>
+                        <div class="signature-cell"></div>
+                    </div>
+                    <div class="tb-row-sign">
+                        <div class="signature-cell">I certify that abovejob has been done to my satisfaction</div>
+                        <div class="signature-cell"></div>
+                        <div class="signature-cell">Delivered by:</div>
+                    </div>
+                    <div class="tb-row-sign">
+                        <div class="signature-cell img-signature">
+                            <img src="" alt="">
+                        </div>
+                        <div class="signature-cell"></div>
+                        <div class="signature-cell img-signature">
+                            <img src="" alt="">
+                        </div>
+                    </div>
+                    <div class="tb-row-sign">
+                        <div class="signature-cell">Signature of Customer/Collection Date</div>
+                        <div class="signature-cell"></div>
+                        <div class="signature-cell">For Samsung Customer Sevice</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

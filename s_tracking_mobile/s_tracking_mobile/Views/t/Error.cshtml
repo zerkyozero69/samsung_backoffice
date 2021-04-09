@@ -1,0 +1,71 @@
+﻿@using System.Configuration;
+@{
+                /**/
+
+                Layout = null;
+                ViewBag.Title = "Error";
+                string path = ConfigurationManager.AppSettings["Base_URL"];
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width">
+    <title>Customer Location Noinformation</title>
+
+    <!-- Bootstrap -->
+    <link href="@{@path}assets/css/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="@{@path}assets/css/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <!-- NProgress -->
+    <link href="@{@path}assets/css/nprogress/nprogress.css" rel="stylesheet">
+    <!-- jQuery custom content scroller -->
+    <link href="@{@path}assets/css/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet" />
+    <!-- Custom Theme Style -->
+    <!-- <link href="assets/css/custom.css" rel="stylesheet"> -->
+    <link href="@{@path}assets/css/_ss-engineer_customer.css" rel="stylesheet">
+    <!-- <link href="assets/css/ss-engineer.css" rel="stylesheet"> -->
+    <script type='text/javascript'>
+        var appInsights = window.appInsights || function (config) {
+            function r(config) { t[config] = function () { var i = arguments; t.queue.push(function () { t[config].apply(t, i) }) } }
+            var t = { config: config }, u = document, e = window, o = 'script', s = u.createElement(o), i, f; for (s.src = config.url || '//az416426.vo.msecnd.net/scripts/a/ai.0.js', u.getElementsByTagName(o)[0].parentNode.appendChild(s), t.cookie = u.cookie, t.queue = [], i = ['Event', 'Exception', 'Metric', 'PageView', 'Trace', 'Ajax']; i.length;)r('track' + i.pop()); return r('setAuthenticatedUserContext'), r('clearAuthenticatedUserContext'), config.disableExceptionTracking || (i = 'onerror', r('_' + i), f = e[i], e[i] = function (config, r, u, e, o) { var s = f && f(config, r, u, e, o); return s !== !0 && t['_' + i](config, r, u, e, o), s }), t
+        }({
+            instrumentationKey: 'a4eb2873-2f78-45b2-baf7-d7595b556eaa'
+        });
+
+        window.appInsights = appInsights;
+        appInsights.trackPageView();
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="cus-lo-infor">
+            <div class="header-customer">
+                <a href="index.html">
+                    <img src="@{@path}assets/images/Logo_SWAT.png">
+                    @*<span>SWAT Application</span>*@
+                </a>
+            </div>
+        </div>
+        <div class="cus-noinformation">
+            <img src="@{@path}assets/images/ico/noinfor-ico.png">
+            <h2>ไม่พบข้อมูล</h2>
+            <div class="description-infor">
+                <span>
+                    ขออภัย เราไม่พบข้อมูลที่ท่านต้องการ <br />
+                    กรุณาตรวจสอบข้อมูลของท่านใหม่อีกครั้ง
+                </span>
+            </div>
+
+            <div class="bt-back">
+                <a href="https://www.samsung.com/th/">ย้อนกลับ</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

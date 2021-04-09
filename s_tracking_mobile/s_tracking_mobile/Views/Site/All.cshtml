@@ -1,0 +1,221 @@
+﻿@model dynamic
+@{
+    ViewBag.Title = "All Sites";
+    var count = ViewData["Count-Data"];
+    var path = ViewData["Current_Path"].ToString();
+}
+
+<div class="content">
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h1>
+                        รายชื่อศูนย์บริการทั้งหมด
+                    </h1>
+                    <div class="x_content table_tools">
+                        <div class="row">
+                            <div class="form-group">
+                                <div class="col-md-4 col-sm-4 col-xs-12">
+                                    <select class="form-control" id="selectProvince">
+                                        <option value="0">All Province</option>
+                                        @foreach (var item in (List<CommonLib.tb_provinces>)ViewData["Provinces"])
+                                        {
+                                            <option value="@item.province_id">@item.province_name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="filter-job">
+                                    <div class="col-sm-1">
+                                        <a onclick="setDataClickPage(1)" class="tableview">
+                                            ค้นหา
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <div class="table-tabs">
+                <div class="tab-content">
+                    <table class="table main-table">
+                        <thead>
+                            <tr>
+                                <th>ชื่อศูนย์บริการ</th>
+                                <th>ที่อยู่</th>
+                                <th>จังหวัด</th>
+                                <th>ชื่อผู้ติดต่อ</th>
+                                <th>เบอร์โทรศัพท์</th>
+                                <th>อีเมลล์</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyUser">
+                            @foreach (var item in (List<s_tracking_mobile.Models.site>)ViewData["All-Site"])
+                            {
+                                var text = item.store_address != null && item.store_address != "" ? item.store_address : "";
+                                text += item.store_moo != null && item.store_moo != "" ? " ซอย " + item.store_moo : "";
+                                text += item.store_street != null && item.store_street != "" ? " ถนน " + item.store_street : "";
+                                text += item.store_sub_district != null ? " ตำบล " + item.store_sub_district : "";
+                                text += item.store_district != null ? " อำเภอ " + item.store_district : "";
+                                text += item.store_postcode != 0 ? item.store_postcode : null;
+                                <tr>
+                                    <td>@item.store_name</td>
+                                    <td>@text</td>
+                                    <td>@item.store_province</td>
+                                    <td>@item.store_contact1</td>
+                                    <td>@item.store_tel1</td>
+                                    <td>@item.store_email1</td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                                            </a>
+                                            <ul class="dropdown-menu" aria-labelledby="dLabel">
+                                                <li>
+                                                    <a onclick="edit('@item.store_guid')">
+                                                        <span>แก้ไข</span>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a onclick="btn_delete_site('@item.id')">
+                                                        <span> ลบ</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div class="clearfix"></div>
+                    <nav aria-label="Page navigation" id="datatable_paginate">
+                        <ul class="pagination"></ul>
+                    </nav>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section header {
+
+}
+@section scripts {
+<script>
+    var base_url = '@{@path}';
+    $(document).ready(function () {
+        pagination(@count,1);
+    });
+
+    function pagination(count,page) {
+        var count = count;
+        var html = "";
+        var count_page = 0;
+        $('.pagination').html("");
+        if (count > 0) {
+            var style_back = page == 1 ? "pointer-events: none;" : "";
+            html += '<li style="' + style_back +'"><a onClick="click_back()" aria-label="Previous"><span aria-hidden="true"><span class="glyphicon glyphicon-menu-left"></span></span></a></li>'
+            for (i = 0; i <= count; i += 20) {
+                count_page++;
+                var style = count_page == page ? 'active' : '';
+                html += '<li data-page="' + count_page + '" class="paginate_button ' + style + '"><a onClick="click_page(\'' + count_page + '\')" aria-controls="datatable" tabindex="0">' + count_page + '</a></li>';
+            }
+            var style_next = count_page == page ? "pointer-events: none;" : "";
+            html += '<li style="' + style_next +'"><a onClick="click_next()" aria-label="Next"><span aria-hidden="true"><span class="glyphicon glyphicon-menu-right"></span></span></a></li>'
+            $('.pagination').append(html);
+        }
+    }
+
+    function click_back() {
+        var page = $('ul.pagination').find('li.active').data('page');
+        setDataClickPage((page - 1));
+    }
+
+    function click_next() {
+        var page = $('ul.pagination').find('li.active').data('page');
+        setDataClickPage((page + 1));
+    }
+
+    function click_page(page) {
+        setDataClickPage(page);
+    }
+
+    function setDataClickPage(page) {
+        var province = document.getElementById('selectProvince').value;
+        $.get(base_url + "site/btn_search_and_skip", { province: province, page: page }, function (val) {
+            $("#tbodyUser").html("");
+            if (val.length != 0) {
+                $('.pagination').html("");
+                var count = val[0].count;
+                pagination(count, page);
+
+                $.each(val, function (idx, obj) {
+                    var html = '';
+
+                    var address = '';
+                    address += obj.store_address != null ? obj.store_address : "";
+                    address += obj.store_moo != null ? " Soi " + obj.store_moo : "";
+                    address += obj.store_street != null ? " Road " + obj.store_street : "";
+                    address += obj.store_sub_district != null ? " Subdistrict " + obj.store_sub_district : "";
+                    address += obj.store_district != null ? " District " + obj.store_district : "";
+                    address += obj.store_postcode != null ? obj.store_postcode : "";
+
+                    html += '<tr>'
+                    html += '<td>' + obj.store_name + '</td>'
+                    html += '<td>' + address + '</td>'
+                    html += '<td>' + (obj.store_province == null ? "" : obj.store_province) + '</td>'
+                    html += '<td>' + (obj.store_contact1 == null ? "" : obj.store_contact1) + '</td>'
+                    html += '<td>' + (obj.store_tel1 == null ? "" : obj.store_tel1) + '</td>'
+                    html += '<td>' + (obj.store_email1 == null ? "" : obj.store_email1) + '</td>'
+                    html += '<td>';
+                    html += '<div class="dropdown">';
+                    html += '<a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></a>';
+                    html += '<ul class="dropdown-menu" aria-labelledby="dLabel">';
+                    html += '<li><a onclick="edit(\'' + obj.store_guid + '\')"><span> แก้ไข</span></a></li>';
+                    html += '<li><a onclick="btn_delete_site(\'' + obj.id + '\')"><span> ลบ</span></a></li>';
+                    html += '</ul>'
+                    html += '</div>';
+                    html += '</td>';
+                    html += '</tr>'
+
+                    $("#tbodyUser").append(html);
+                });
+            } else {
+                $('.pagination').html("");
+                var html = '';
+                html += '<tr><td rowspan="7"><center>ไม่มีร้านค้าในจังหวัดที่ค้นหา</center></tr>'
+                $("#tbodyUser").append(html);
+            }
+            
+        });
+        $("html, body").animate({ scrollTop: 0 }, "slow");
+    }
+
+    function btn_delete_site(val) {
+        var check = confirm("Are you sure for delete Site ?");
+        if (check == true) {
+            $.ajax({
+                url: base_url + "site/btn_delete_store",
+                type: "POST",
+                data: { id: val },
+                success: function (val) {
+                    location.reload();
+                },
+                error: function (err) {
+
+                }
+            })
+        }
+    }
+
+    function edit(id) {
+        window.location.href = base_url + "site/edit?id=" + id;
+    };
+
+</script>
+}
+
