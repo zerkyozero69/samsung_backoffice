@@ -1,0 +1,1659 @@
+﻿@using System.Configuration;
+@using s_tracking_mobile.Models;
+@{
+    var key_azure = ViewData["Key_Azure"];
+    var data = ((CommonLib.tb_jobs)ViewData["Data"]);
+    ViewBag.Title = "Edit Job";
+    var path = ViewData["Current_Path"].ToString();
+    var azure_path = ViewData["Azure_Path"].ToString();
+    string[] monthNames = { "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค." };
+    string[] dayNames = { "อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัส", "ศุกร์", "เสาร์" };
+    var googleMap_url = ConfigurationManager.AppSettings["googleMap_key"];
+    var check_image = false;
+    var sms_send = ViewData["sms_send"];
+    var disabled = User.IsInRole("admin") ? "" : "disabled";
+
+    var survey = ViewData["Survey"] as survey_job_edit;
+}
+@if (data != null)
+{
+    <div class="content">
+        <div class="row">
+            <div class="col-md-12 col-sm-6 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h1>
+                            แก้ไขงาน
+                        </h1>
+                        <div class="form-tools">
+                            <a href="@{@path}job/all" class="back-btn">
+                                กลับ
+                            </a>
+                            <a href="@{@path}standard/get?id=@data.job_guid" target="_blank">
+                                พิมพ์รายงาน
+                            </a>
+                            <a onclick="stamp_voice()" style="border: 1px solid #FD7922 !important;color: #FD7922 !important;margin-left: 20px !important;">
+                                ลูกค้าไม่รับสาย/ติดต่อไม่ได้
+                            </a>
+                            <a onclick="save()" class="exitsave-btn">
+                                บันทึกและออก
+                            </a>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <div class="x_panel form">
+                    <div style="text-align: right;">
+                        <label>อัพเดทโดย @data.user_update - @data.update_date</label>
+                    </div>
+
+                    <div>
+                        <!-- step 2 -->
+                        <div id="form2" class="form-horizontal form-label-left" novalidate="">
+                            <div class="col-xs-12 col-md-12">
+                                <span class="section">ข้อมูลงาน</span>
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                            หมายเลขงาน
+                                        </label>
+                                        <div class="col-md-8 col-sm-8 col-xs-12">
+                                            <input readonly="readonly" type="text" value="@data.service_order_no" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                            สถานะการซ่อม
+                                        </label>
+                                        <div class="col-md-8 col-sm-8 col-xs-12">
+
+                                            <input readonly="readonly" type="text" class="form-control"
+                                                   value="@(data.status_job == 0 ? "Assigned" : data.status_job == 6 ? "Engineer Assigned" : data.status_job == 7 ? "Start Job / เริ่มเดินทาง" :
+                                                                                 data.status_job == 8 ? "Start Repair / เริ่มซ่อมงาน" : data.status_job == 9 ? "Job Delay / งานล่าช้า" : data.status_job == 10 ? "selOver time / ซ่อมล่าช้าected" :
+                                                                                 data.status_job == 11 ? "long time journey / เดินทาง" : data.status_job == 2 ? "Pending" : data.status_job == 3 ? "Completed" : data.status_job == 4 ? "Cancel" : "")">
+
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                        </label>
+                                        <div class="col-md-8 col-sm-8 col-xs-12">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                        </label>
+                                        <div class="col-md-8 col-sm-8 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            @*<div class="col-xs-12 col-md-6">
+
+                                    <span class="section">ตรวจสอบคุณภาพ</span>
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                ตรวจสอบคุณภาพ
+                                            </label>
+                                            <div class="col-md-8 col-sm-8 col-xs-12">
+                                                <input readonly="readonly" type="text" value="@(survey != null && survey.is_feedback == 1 ? "ตรวจสอบแล้ว" : "ยังไม่ตรวจสอบ")" class="form-control">
+
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                ตรวจสอบคุณภาพโดย
+                                            </label>
+                                            <div class="col-md-8 col-sm-8 col-xs-12">
+                                                <input readonly="readonly" type="text" value="@(survey != null ? survey.feedback_user : "")" class="form-control">
+                                            </div>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                ตรวจสอบคุณภาพเมื่อ
+                                            </label>
+                                            <div class="col-md-8 col-sm-8 col-xs-12">
+                                                <input readonly="readonly" type="text" value="@( survey != null ? survey.feedback_date.ToString() : "")" class="form-control">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                คะแนน
+                                            </label>
+                                            <div class="col-md-8 col-sm-8 col-xs-12">
+                                                <input readonly="readonly" type="text" value="@(survey != null ? survey.score.ToString() : "")" class="form-control">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>*@
+                        </div>
+                    </div>
+
+                    <div class="" role="tabpanel" data-example-id="togglable-tabs">
+                        <ul id="myTab" class="nav nav-step row" role="tablist">
+                            <li id="link1" role="presentation" class="col-xs-3 active">
+                                <a href="#tab_content1" role="tab" id="profile-tab2" data-toggle="tab" aria-expanded="false">ข้อมูลช่าง</a>
+                            </li>
+                            <li role="presentation" class="col-xs-3">
+                                <a href="#tab_content2" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true">ข้อมูลลูกค้า</a>
+                            </li>
+                            <li role="presentation" class="col-xs-3">
+                                <a href="#tab_content3" role="tab" id="profile-tab" data-toggle="tab" aria-expanded="false">ข้อมูลงาน</a>
+                            </li>
+                            <li id="link4" role="presentation" class="col-xs-3">
+                                <a href="#tab_content4" role="tab" id="profile-tab" data-toggle="tab" aria-expanded="false">ข้อมูลแบบทดสอบ</a>
+                            </li>
+                        </ul>
+                        <div id="myTabContent" class="tab-content">
+                            <div role="tabpanel" class="tab-pane fade active in" id="tab_content1" aria-labelledby="profile-tab">
+                                <br />
+                                <span class="section">ข้อมูลช่าง</span>
+                                <div id="demo-form2" class="form-horizontal form-label-left" novalidate="">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                            สร้างงานโดย
+                                        </label>
+                                        <div class="col-md-4 col-sm-4 col-xs-12">
+                                            <input type="text" value="@data.user_update" readonly="readonly" required="required" class="form-control">
+                                            <div class="alert">please put something here</div>
+                                        </div>
+                                    </div>
+                                    <div id="edit_select_site" class="form-group">
+                                        <label class="control-label col-md-3 col-sm-2 col-xs-12">ชื่อศูนย์บริการ</label>
+                                        <div class="col-md-9 col-sm-10 col-xs-12">
+                                            <select @(ViewBag.id_store != 0 ? "disabled" : "") class="form-control js-example-basic-single" id="selectStore">
+                                                <option value="">เลือกศูนย์บริการ</option>
+                                                @if (ViewBag.id_store != 0)
+                                                {
+                                                    foreach (var item in ((List<CommonLib.tb_store>)ViewData["Site"]).Where(w => w.id == ViewBag.id_store))
+                                                    {
+                                                        <option @(data.store_id == item.id ? "selected" : "")
+                                                                data-dis="@(((List<CommonLib.tb_districts>)ViewData["Districtes"]).Where(w => w.district_id == item.district).Select(s => s.district_name).FirstOrDefault())"
+                                                                data-subDis="@(((List<CommonLib.tb_amphures>)ViewData["Sub_Districtes"]).Where(w => w.amphur_id == item.sub_district).Select(s => s.amphur_name).FirstOrDefault())"
+                                                                data-province="@(((List<CommonLib.tb_provinces>)ViewData["Provinces"]).Where(w => w.province_id == item.province).Select(s => s.province_name).FirstOrDefault())"
+                                                                data-postcode="@item.postcode"
+                                                                data-street="@item.street"
+                                                                data-site_address="@item.site_address"
+                                                                data-village="@item.village"
+                                                                value="@item.id"
+                                                                @(ViewBag.temAddressStore = item)>
+                                                            @item.site_name
+                                                        </option>
+
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    foreach (var item in (List<CommonLib.tb_store>)ViewData["Site"])
+                                                    {
+                                                        <option @(data.store_id == item.id ? "selected" : "")
+                                                                data-dis="@(((List<CommonLib.tb_districts>)ViewData["Districtes"]).Where(w => w.district_id == item.district).Select(s => s.district_name).FirstOrDefault())"
+                                                                data-subDis="@(((List<CommonLib.tb_amphures>)ViewData["Sub_Districtes"]).Where(w => w.amphur_id == item.sub_district).Select(s => s.amphur_name).FirstOrDefault())"
+                                                                data-province="@(((List<CommonLib.tb_provinces>)ViewData["Provinces"]).Where(w => w.province_id == item.province).Select(s => s.province_name).FirstOrDefault())"
+                                                                data-postcode="@item.postcode"
+                                                                data-street="@item.street"
+                                                                data-site_address="@item.site_address"
+                                                                data-village="@item.village"
+                                                                value="@item.id"
+                                                                @(ViewBag.temAddressStore = item)>
+                                                            @item.site_name
+                                                        </option>
+
+                                                    }
+                                                }
+                                            </select>
+                                            <div id="alert_select_site" class="alert">กรุณาเลือกศูนย์บริการ</div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                            ที่อยู่ศูนย์บริการ
+                                        </label>
+                                        <div class="col-md-4 col-sm-4 col-xs-12">
+                                            @{
+                                                var data2 = ((CommonLib.tb_store)@ViewBag.temAddressStore);
+                                                var sub_dis = ((List<CommonLib.tb_amphures>)ViewData["Sub_Districtes"]).Where(w => w.amphur_id == data2.sub_district).Select(s => s.amphur_name).FirstOrDefault();
+                                                var dis = ((List<CommonLib.tb_districts>)ViewData["Districtes"]).Where(w => w.district_id == data2.district).Select(s => s.district_name).FirstOrDefault();
+                                                var province = ((List<CommonLib.tb_provinces>)ViewData["Provinces"]).Where(w => w.province_id == data2.province).Select(s => s.province_name).FirstOrDefault();
+                                                var text = data2.site_address != null && data2.site_address != "" ? data2.site_address : "";
+                                                text += data2.village != null && data2.village != "" ? " Soi " + data2.village : "";
+                                                text += data2.street != null && data2.street != "" ? " Road " + data2.street : "";
+                                                text += sub_dis != null ? " Subdistrict " + sub_dis : "";
+                                                text += dis != null ? " District " + dis : "";
+                                                text += province != null ? " , " + province : "";
+                                                text += data2.postcode != 0 ? data2.postcode : null;
+
+                                                <p>@text</p>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div id="edit_select_engineer" class="form-group">
+                                        <label class="control-label col-md-3 col-sm-2 col-xs-12">ชื่อช่าง</label>
+                                        <div class="col-md-9 col-sm-10 col-xs-12">
+                                            <select class="form-control js-example-basic-single" id="selectEngineer">
+                                                <option value=""
+                                                        data-id="0"
+                                                        data-tel1="0"
+                                                        data-tel2="0"
+                                                        data-tel3="0">
+                                                    เลือกช่าง
+                                                </option>
+                                                @foreach (var item in (List<s_tracking_mobile.Models.getEngineer>)ViewData["Engineer"])
+                                                {
+                                                    <option @(data.engineer_id == item.id ? "selected" : "")
+                                                            value="@item.id"
+                                                            data-id="@item.id"
+                                                            data-tel1="@item.tel1"
+                                                            data-tel2="@item.tel2"
+                                                            data-tel3="@item.tel3">
+                                                        @item.name @item.repair_type_info1 @item.repair_type_info2 @item.repair_type_info3
+                                                    </option>
+                                                }
+                                            </select>
+                                            <div id="alert_select_engineer" class="alert">กรุณาเลือกช่างซ่อม</div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                            ไอดีช่าง
+                                        </label>
+                                        <div class="col-md-4 col-sm-4 col-xs-12">
+                                            <input type="text" id="en_id" readonly="readonly" required="required" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                            หมายเลขโทรศัพท์
+                                        </label>
+                                        <div class="col-md-4 col-sm-4 col-xs-12">
+                                            <input type="text" id="en_tel1" readonly="readonly" required="required" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                            Customer Preferred Date
+                                        </label>
+                                        <div class="col-md-4 col-sm-4 col-xs-12">
+                                            @if (data.customer_prefer_date.HasValue == true)
+                                            {
+                                                <span class="text-only"> <b>@data.customer_prefer_date.Value.ToString("dd MMM yyy")</b></span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                            Customer Preferred Time
+                                        </label>
+                                        <label class="col-md-4 col-sm-4 col-xs-12">
+                                            <span class="text-only"> <b>@data.customer_perfer_time</b></span>
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                            วันที่ทำงาน
+                                        </label>
+                                        <div class="col-md-4 col-sm-4 col-xs-12">
+                                            @{
+                                                var start_date = data.appointment_datetime != null ? data.appointment_datetime : DateTime.Today;
+                                                <input type="text" value="@start_date.Value.ToString("dd/MM/yyyy")" class="form-control start-date-input" style="color: transparent;text-shadow: 0 0 0 #000000;" placeholder="วันที่เริ่มงาน" id="single_cal6" />
+                                            }
+                                        </div>
+                                    </div>
+                                    <div id="edit_select_time" class="form-group">
+                                        <label class="control-label col-md-3 col-sm-2 col-xs-12">เวลาเริ่มงาน</label>
+                                        <span id="alert_select_time" class="alert">กรุณาเลือกเวลา</span>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <select id="app_time_hours">
+                                                <option value="">hours</option>
+                                                @{var data_hours = data.appointment_datetime != null ? data.appointment_datetime.Value.Hour : 0;}
+                                                @for (var i = 6; i <= 24; i++)
+                                                {
+                                                    <option @(data_hours == i ? "selected" : "") value="@i">@i</option>
+                                                }
+                                            </select>
+                                            <label> : </label>
+                                            <select id="app_time_minute">
+                                                <option value="">minute</option>
+                                                @{var data_minute = data.appointment_datetime != null ? data.appointment_datetime.Value.Minute : 0;}
+                                                @for (var i = 0; i <= 60; i++)
+                                                {
+                                                    <option @(data_minute == i ? "selected" : "") value="@i">@(i < 10 ? "0" + i.ToString() : i.ToString())</option>
+                                                }
+                                            </select>
+                                            <label> - </label>
+                                            <select id="app_to_time_hours">
+                                                <option value="">hours</option>
+                                                @{var data_to_hours = data.appointment_to_datetime != null ? data.appointment_to_datetime.Value.Hour : 0;}
+                                                @for (var i = 8; i <= 24; i++)
+                                                {
+                                                    <option @(data_to_hours == i ? "selected" : "") value="@i">@i</option>
+                                                }
+                                            </select>
+                                            <label> : </label>
+                                            <select id="app_to_time_minute">
+                                                <option value="">minute</option>
+                                                @{var data_to_minute = data.appointment_to_datetime != null ? data.appointment_to_datetime.Value.Minute : 0;}
+                                                @for (var i = 0; i <= 60; i++)
+                                                {
+                                                    <option @(data_to_minute == i ? "selected" : "") value="@i">@(i < 10 ? "0" + i.ToString() : i.ToString())</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="show-job">
+                                    <div class="history-list">
+                                        <ul id="description_engineer">
+                                            @*@foreach (var item in ((List<CommonLib.tb_jobs>)ViewData["All-Job"]))
+                                                {
+                                                    var text_status = "";
+                                                    var color = "";
+                                                    var text_show = item.appointment_datetime != null && item.appointment_to_datetime != null ? (item.appointment_datetime.Value.Hour < 10 ? "0" + item.appointment_datetime.Value.Hour.ToString() : item.appointment_datetime.Value.Hour.ToString()) + ":" + (item.appointment_datetime.Value.Minute < 10 ? "0" + item.appointment_datetime.Value.Minute.ToString() : item.appointment_datetime.Value.Minute.ToString()) : "กรุณาตั้งเวลา";
+                                                    var text_show_end = item.appointment_to_datetime != null ? (item.appointment_to_datetime.Value.Hour < 10 ? "0" + item.appointment_to_datetime.Value.Hour.ToString() : item.appointment_to_datetime.Value.Hour.ToString()) + ":" + (item.appointment_to_datetime.Value.Minute < 10 ? "0" + item.appointment_to_datetime.Value.Minute.ToString() : item.appointment_to_datetime.Value.Minute.ToString()) : "";
+                                                    switch (item.status_job)
+                                                    {
+                                                        case 0: color = "proceed"; text_status = "Assigned"; break;
+                                                        case 2: color = "pending"; text_status = "Pending"; break;
+                                                        case 3: color = "finished"; text_status = "Completed"; break;
+                                                        case 4: color = "cancel"; text_status = "Cancel"; break;
+                                                        case 6: color = "proceed"; text_status = "Engineer Assigned"; break;
+                                                        case 7: color = "proceed"; text_status = "Start job"; break;
+                                                        case 8: color = "proceed"; text_status = "Start Repair"; break;
+                                                        case 9: color = "proceed"; text_status = "Job Delay"; break;
+                                                        case 10: color = "proceed"; text_status = "Overtime"; break;
+                                                        case 11: color = "proceed"; text_status = "LongTimeJourney"; break;
+                                                    }
+                                                    <li class="job-status @color">
+                                                        <div class="job-time">
+                                                            <span class="start">@text_show</span>
+                                                            <span class="end">@text_show_end</span>
+                                                        </div>
+                                                        <div class="job-desc">
+                                                            <span class="@color">@text_status</span>
+                                                            <span>@item.service_order_no @item.model</span>
+                                                        </div>
+                                                    </li>
+                                                }*@
+                                        </ul>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content2" aria-labelledby="home-tab">
+                                <div id="demo-form2" class="form-horizontal form-label-left" novalidate="">
+                                    <span class="section">ข้อมูลลูกค้า</span>
+                                    <div class="row">
+                                        <!-- left -->
+                                        <div class="col-sm-6 col-xs-12">
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    ชื่อลูกค้า
+                                                </label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <input type="text" readonly="readonly" value="@data.customer_fullname" id="txtFullname" required="required" class="form-control">
+                                                    <div class="alert">please put something here</div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    อีเมล์
+                                                </label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <input type="text" readonly="readonly" value="@data.email" id="txtEmail" required="required" class="form-control">
+                                                    <div class="alert">please put something here</div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    หมายเลขโทรศัพท์ (Mobile)
+                                                </label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <input type="text" readonly="readonly" value="@data.phone_mobile" id="txtPhoneMobile" required="required" class="form-control">
+                                                    <div class="alert">please put something here</div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    เลขที่อยู่
+                                                </label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <input type="text" readonly="readonly" value="@data.site_address" id="txtHomeAddress" required="required" class="form-control">
+                                                    <div class="alert">please put something here</div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    หมู่ / ซอย
+                                                </label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <input type="text" readonly="readonly" value="@data.moo" id="txtMoo" required="required" class="form-control">
+                                                    <div class="alert">please put something here</div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12">อำเภอ / เขต</label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <select disabled class="form-control js-example-basic-single" id="selectSubDistrict">
+                                                        <option value="0">เลือกอำเภอ / เขต</option>
+                                                        @foreach (var item in (List<CommonLib.tb_amphures>)ViewData["Sub_Districtes"])
+                                                        {
+                                                            <option @(data.sub_district == item.amphur_id ? "selected" : "" ) value="@item.amphur_id">@item.amphur_name</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12">จังหวัด</label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <select disabled class="form-control js-example-basic-single" id="selectProvince">
+                                                        <option value="0">เลือกจังหวัด</option>
+                                                        @foreach (var item in (List<CommonLib.tb_provinces>)ViewData["Provinces"])
+                                                        {
+                                                            <option @(data.province == item.province_id ? "selected" : "") value="@item.province_id">@item.province_name</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    Latitude
+                                                </label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <input type="text" value="@data.customer_lat" id="txtcustomer_lat" required="required" class="form-control">
+                                                    <div class="alert">please put something here</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- right -->
+                                        <div class="col-sm-6 col-xs-12">
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12">เพศ</label>
+                                                <div class="col-md-4 col-sm-4 col-xs-12">
+                                                    <div id="gender" style="pointer-events: none;" class="btn-group" data-toggle="buttons">
+                                                        @{
+                                                            var male = data.gender == 1 ? "active" : "";
+                                                            var femail = data.gender == 2 ? "active" : "";
+                                                            <label class="btn btn-primary @male" data-toggle-class="btn-primary" data-toggle-passive-class="btn-default">
+                                                                <input type="radio" name="gender" value="male" data-parsley-multiple="gender"> &nbsp; ชาย &nbsp;
+                                                            </label>
+                                                            <label class="btn btn-primary @femail" data-toggle-class="btn-primary" data-toggle-passive-class="btn-default">
+                                                                <input type="radio" name="gender" value="female" data-parsley-multiple="gender"> หญิง
+                                                            </label>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    หมายเลขโทรศัพท์ (Home)
+                                                </label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <input type="text" readonly="readonly" value="@data.phone_home" id="txtPhomeHome" required="required" class="form-control">
+                                                    <div class="alert">please put something here</div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    หมายเลขโทรศัพท์ (Office)
+                                                </label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <input type="text" readonly="readonly" value="@data.phone_office" id="txtPhoneOffice" required="required" class="form-control">
+                                                    <div class="alert">please put something here</div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    หมู่บ้าน / อาคาร
+                                                </label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <input type="text" readonly="readonly" value="@data.village" id="txtVillage" required="required" class="form-control">
+                                                    <div class="alert">please put something here</div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    ถนน
+                                                </label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <input type="text" readonly="readonly" value="@data.street" id="txtStreet" required="required" class="form-control">
+                                                    <div class="alert">please put something here</div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12">ตำบล / แขวง</label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <select disabled class="form-control js-example-basic-single" id="selectDistrict">
+                                                        <option value="0">เลือกตำบล / แขวง</option>
+                                                        @foreach (var item in (List<CommonLib.tb_districts>)ViewData["Districtes"])
+                                                        {
+                                                            <option @(data.district == item.district_id ? "selected" : "" ) value="@item.district_id">@item.district_name</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    รหัสไปรษณีย์
+                                                </label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <input readonly="readonly" type="text" value="@data.zipcode" id="txtZipCode" required="required" class="form-control">
+                                                    <div class="alert">please put something here</div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    Longitude
+                                                </label>
+                                                <div class="col-md-9 col-sm-10 col-xs-12">
+                                                    <input type="text" value="@data.customer_long" id="txtcustomer_long" required="required" class="form-control">
+                                                    <div class="alert">please put something here</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--MAP-->
+                                <div id="demo-form2" class="form-horizontal form-label-left" novalidate="">
+                                    <div class="form-tools">
+                                        <a id="btn_open_map" onclick="open_map()">
+                                            แก้ไขจากแผนที่
+                                        </a>
+                                    </div>
+                                    <div class="form-group" id="div_map">
+                                    </div>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content3" aria-labelledby="profile-tab">
+                                <br />
+                                <span class="section">ข้อมูลงาน</span>
+                                <!--TEST-->
+                                <div class="form formjob-2" data-step="formjob-2">
+                                    <!-- step 2 -->
+                                    <div id="form2" class="form-horizontal form-label-left" novalidate="">
+                                        <div class="form-group">
+                                            <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                สร้างงานโดย
+                                            </label>
+                                            <div class="col-md-8 col-sm-8 col-xs-12">
+                                                <input type="text" value="@data.user_update" readonly="readonly" required="required" class="form-control">
+                                                <div class="alert">please put something here</div>
+                                            </div>
+                                        </div>
+                                        <div class="clearfix"></div>
+                                        <div class="col-xs-12 col-md-5">
+                                            <span class="section">ข้อมูลงาน</span>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        หมายเลขงาน
+                                                    </label>
+                                                    <div class="col-md-8 col-sm-8 col-xs-12">
+                                                        <input type="text" value="@data.service_order_no" readonly="readonly" required="required" class="form-control">
+                                                        <div class="alert">please put something here</div>
+                                                    </div>
+                                                </div>
+                                                <div id="alert_selectCategory" class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12">ประเภทสินค้า</label>
+                                                    <div class="col-md-8 col-sm-8 col-xs-12">
+                                                        <select class="form-control js-example-basic-single" id="selectCategory">
+                                                            <option value="">เลือกประเภทสินค้า</option>
+                                                            @foreach (var item in (List<CommonLib.tb_jobsl_category>)ViewData["Category"])
+                                                            {
+                                                                <option @(data.job_category_id == item.id ? "selected" : "") value="@item.id">@item.name</option>
+                                                            }
+                                                        </select>
+                                                        <div id="txt_alert_selectCategory" class="alert">กรุณาเลือกประเภทสินค้า</div>
+                                                    </div>
+                                                </div>
+                                                <div id="alert_selectSubCategory" class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12">หมวดหมู่สินค้า</label>
+                                                    <div class="col-md-8 col-sm-8 col-xs-12">
+                                                        <select class="form-control js-example-basic-single" id="selectSubCategory">
+                                                            <option value="">เลือกหมวดหมู่สินค้า</option>
+                                                            @foreach (var item in (List<CommonLib.tb_jobsl_category>)ViewData["Sub-Category"])
+                                                            {
+                                                                <option @(data.sub_category_id == item.id ? "selected" : "") value="@item.id">@item.name</option>
+                                                            }
+                                                        </select>
+                                                        <div id="txt_alert_selectSubCategory" class="alert">กรุณาเลือกหมวดหมู่สินค้า</div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        ชื่อสินค้า
+                                                    </label>
+                                                    <div class="col-md-8 col-sm-8 col-xs-12">
+                                                        <input type="text" value="@data.model" id="txtModel" required="required" class="form-control">
+                                                        <div class="alert">please put something here</div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12">สถานะงาน</label>
+                                                    <div class="col-md-8 col-sm-8 col-xs-12">
+                                                        <select class="form-control js-example-basic-single" id="selectStatus">
+                                                            <option @(data.status_job == 0 ? "selected" : "") value="0">Assigned</option>
+                                                            <option @(data.status_job == 6 ? "selected" : "") value="6">Engineer Assigned</option>
+                                                            <option @disabled @(data.status_job == 7 ? "selected" : "") value="7">Start Job / เริ่มเดินทาง</option>
+                                                            <option @disabled @(data.status_job == 8 ? "selected" : "") value="8">Start Repair / เริ่มซ่อมงาน</option>
+                                                            <option @disabled @(data.status_job == 9 ? "selected" : "") value="9">Job Delay / งานล่าช้า</option>
+                                                            <option @disabled @(data.status_job == 10 ? "selected" : "") value="10">Over time / ซ่อมล่าช้า</option>
+                                                            <option @disabled @(data.status_job == 11 ? "selected" : "") value="11">long time journey / เดินทาง</option>
+                                                            <option @(data.status_job == 2 ? "selected" : "") value="2">Pending</option>
+                                                            <option @(data.status_job == 3 ? "selected" : "") value="3">Completed</option>
+                                                            <option @(data.status_job == 4 ? "selected" : "") value="4">Cancel</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                @if (data.status_job == 4 || data.status_job == 2)
+                                                {
+                                                    <div class="form-group">
+                                                        <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                            วันที่ยกเลิก
+                                                        </label>
+                                                        <div class="col-md-4 col-sm-4 col-xs-12">
+                                                            <span class="text-only">@(data.cancel_date == null ? "-" : data.cancel_date.Value.ToString("dd MMM yyy : HH:mm:ss"))</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                            สาเหตุที่ยกเลิก
+                                                        </label>
+                                                        <div class="col-md-4 col-sm-4 col-xs-12">
+                                                            <span class="text-only">@(data.reason_cancel == null ? "-" : data.reason_cancel)</span>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        เวลาล่าสุดที่เปิดดูหน้าเว็บ
+                                                    </label>
+                                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                                        <span class="text-only">@(data.date_customer == null ? "-" : data.date_customer.Value.ToString("dd MMM yyy : HH:mm:ss"))</span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        IP ลูกค้า
+                                                    </label>
+                                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                                        <span class="text-only">@(data.ip_customer == null ? "-" : data.ip_customer)</span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        รายละเอียดการเสีย
+                                                    </label>
+                                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                                        <span class="text-only">@(data.description_breakdown == null ? "-" : data.description_breakdown)</span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        รายละเอียดอะไหล่
+                                                    </label>
+                                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                                        <span class="text-only">@(data.description_parts == null ? "-" : data.description_parts)</span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        เวลาเริ่มงาน
+                                                    </label>
+                                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                                        @if (data.job_start.HasValue == true)
+                                                        {
+                                                            TimeSpan difference = data.job_repair.HasValue == true ? (data.job_repair.Value - data.job_start.Value) : (data.job_start.Value - data.job_start.Value);
+                                                            var text_job_start = data.job_repair.HasValue == true ? "ระยะเวลาเดินทาง  <b>" + difference.ToString(@"hh\:mm\:ss") + "</b> นาที " : "";
+                                                            <span class="text-only">@data.job_start.Value.ToString("dd MMM yyy : HH:mm:ss ") @Html.Raw(text_job_start) </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-only"> <b>-</b></span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        เวลาเริ่มซ่อม
+                                                    </label>
+                                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                                        @if (data.job_repair.HasValue == true)
+                                                        {
+                                                            <span class="text-only">@data.job_repair.Value.ToString("dd MMM yyy : HH:mm:ss")</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-only"> <b>-</b></span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        เวลาซ่อมเสร็จ
+                                                    </label>
+                                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                                        @if (data.job_end.HasValue == true && data.job_repair.HasValue == true)
+                                                        {
+                                                            TimeSpan difference = (data.job_repair.Value - data.job_end.Value);
+                                                            var text_job_end = "ใช้เวลาซ่อม <b>" + difference.ToString(@"hh\:mm\:ss") + "</b> นาที";
+                                                            <span class="text-only"> @data.job_end.Value.ToString("dd MMM yyy : HH:mm:ss") @Html.Raw(text_job_end)</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-only"> <b>-</b></span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        การประกัน
+                                                    </label>
+                                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                                        <span class="text-only">@data.warranty_flag</span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        เวลาที่ส่ง SMS
+                                                    </label>
+                                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                                        @{var sms_date = sms_send == null ? (DateTime?)null : DateTime.Parse(sms_send.ToString());}
+                                                        <span class="text-only">@(sms_send == null ? "-" : sms_date.Value.ToString("dd MMM yyy : HH:mm:ss"))</span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-xs-12" for="first-name">
+                                                        คำอธิบาย
+                                                    </label>
+                                                    <div class="col-xs-12">
+                                                        <textarea id="txtDescription" required="required" name="message" class="form-control"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-xs-12" for="first-name">
+                                                        บันทึกเพิ่ม
+                                                    </label>
+                                                    <div class="col-xs-12">
+                                                        <textarea id="txtNote" required="required" name="message" class="form-control"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-md-7">
+                                            <span class="section">ภาพถ่ายงานซ่อม</span>
+                                            <div class="process-gallery">
+                                                @if (ViewData["Picture"] != null)
+                                                {
+                                                    if (((List<CommonLib.tb_attachment>)ViewData["Picture"]).Count() > 0)
+                                                    {
+                                                        check_image = true;
+                                                        foreach (var item in ((List<CommonLib.tb_attachment>)ViewData["Picture"]).OrderBy(i => i.sort))
+                                                        {
+
+                                                            var url_pic = azure_path + item.part_name.ToString() + item.name_file.ToString();
+                                                            var time = item.create_date;
+                                                            var text_date = item.create_date.ToString("dd MMM yyyy");
+
+                                                            <div class="col-xs-4">
+                                                                <a href="@url_pic@key_azure">
+                                                                    <img src="@url_pic@key_azure" height="100%">
+                                                                </a>
+                                                                <ul>
+                                                                    <li><span>วันที่ :</span> @text_date</li>
+                                                                    <li><span>เวลา :</span> @(time.Hour.ToString().Length == 1 ? "0" + time.Hour.ToString() : time.Hour.ToString()):@(time.Minute.ToString().Length == 1 ? "0" + time.Minute.ToString() : time.Minute.ToString()) </li>
+                                                                </ul>
+                                                            </div>
+                                                        }
+                                                    }
+                                                }
+                                                <div class="clearfix"></div>
+                                            </div>
+                                            <span class="section">บันทึกเสียงการโทร</span>
+                                            <div class="record-list">
+                                                <ul>
+                                                    @if (ViewData["Voice"] != null)
+                                                    {
+                                                        foreach (var item in (List<CommonLib.tb_attachment>)ViewData["Voice"])
+                                                        {
+                                                            var time = item.create_date;
+                                                            var text_date = item.create_date.ToString("dd MMM yyyy");
+
+                                                            var url_pic = item.part_name != null && item.part_name != "" ? azure_path + item.part_name.ToString() + item.name_file.ToString() + key_azure : "";
+                                                            <li>
+                                                                <div class="name-size">
+                                                                    @item.name_file
+                                                                    <br />
+                                                                    @if (item.part_name != null && item.part_name != "")
+                                                                    {
+                                                                        <audio controls>
+                                                                            <source src="@url_pic" type="audio/aac">
+                                                                            Your browser does not support the audio element.
+                                                                        </audio>
+                                                                    }
+                                                                </div>
+                                                                <div class="date-download">
+                                                                    @text_date @(time.Hour.ToString().Length == 1 ? "0" + time.Hour.ToString() : time.Hour.ToString()):@(time.Minute.ToString().Length == 1 ? "0" + time.Minute.ToString() : time.Minute.ToString())
+                                                                    @if (item.part_name != null && item.part_name != "")
+                                                                    {
+                                                                        <a href="@url_pic" download>
+                                                                            ดาวน์โหลด
+                                                                        </a>
+                                                                    }
+                                                                </div>
+                                                            </li>
+                                                        }
+                                                    }
+                                                </ul>
+                                            </div>
+                                            <span class="section">ลายเซ็นชื่อของลูกค้า</span>
+                                            <div class="customer-sign">
+                                                @{
+                                                    if (data.signature_path != null)
+                                                    {
+                                                        var url_pic1 = azure_path + data.signature_path.ToString() + data.signature_name.ToString();
+                                                        <img src="@url_pic1@key_azure">
+                                                    }
+                                                    else
+                                                    {
+                                                        <img src="">
+                                                    }
+
+
+                                                }
+                                            </div>
+                                        </div>
+                                        @if (((List<s_tracking_mobile.Models.log_job>)ViewData["Logs-Job"]).Count > 0)
+                                        {
+                                            <div class="clearfix"></div>
+                                            <br />
+                                            <span class="section">Logs Work</span>
+                                            <div class="table-tabs">
+                                                <div class="tab-content">
+                                                    <table class="table main-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>วันที่เข้าซ่อม / เวลา</th>
+                                                                <th>สถานะงาน</th>
+                                                                <th>Job Start</th>
+                                                                <th>ใช้เวลาเดินทาง</th>
+                                                                <th>Job Repair</th>
+                                                                <th>Job End</th>
+                                                                <th>ใช้เวลาทำงาน</th>
+                                                                <th>สาเหตูที่ยกเลิก</th>
+                                                                <th>วันที่ยกเลิก</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="tbodyData">
+                                                            @foreach (var item in (List<s_tracking_mobile.Models.log_job>)ViewData["Logs-Job"])
+                                                            {
+                                                                TimeSpan difference = item.job_repair != null && item.job_start != null ? (item.job_start.Value - item.job_repair.Value) : TimeSpan.Zero;
+                                                                TimeSpan difference2 = item.job_end != null && item.job_repair != null ? (item.job_repair.Value - item.job_end.Value) : TimeSpan.Zero;
+                                                                <tr>
+                                                                    <td>
+                                                                        @if (item.Appointment_datetime != null && item.Appointment_to_datetime != null)
+                                                                        {
+                                                                            var text_log = item.Appointment_datetime.Value.ToString("dd/MMM/yyy <br /> เวลา HH:mm");
+                                                                            var text2_log = "-" + item.Appointment_to_datetime.Value.Hour + ":" + (item.Appointment_to_datetime.Value.Minute < 10 ? "0" + item.Appointment_to_datetime.Value.Minute.ToString() : item.Appointment_to_datetime.Value.Minute.ToString());
+                                                                            <p>@Html.Raw(text_log) @Html.Raw(text2_log)</p>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <span class="set-time-alert"></span>
+                                                                        }
+                                                                    </td>
+                                                                    <td>@item.status_job.Replace("_", " ")</td>
+                                                                    <td>@(item.job_start != null ? item.job_start.Value.ToString("dd/MMM/yyy เวลา HH:mm") : "")</td>
+                                                                    <td>@(item.job_repair != null && item.job_start != null ? difference.ToString(@"hh\:mm\:ss") + "นาที" : "")</td>
+                                                                    <td>@(item.job_repair != null ? item.job_repair.Value.ToString("dd/MMM/yyy เวลา HH:mm") : "")</td>
+                                                                    <td>@(item.job_end != null ? item.job_end.Value.ToString("dd/MMM/yyy เวลา HH:mm") : "")</td>
+                                                                    <td>@(item.job_end != null && item.job_repair != null ? difference2.ToString(@"hh\:mm\:ss") + "นาที" : "")</td>
+                                                                    <td>@item.reason_cancel</td>
+                                                                    <td>@(item.cencel_date != null ? item.cencel_date.Value.ToString("dd/MMM/yyy เวลา HH:mm") : "")</td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                    <div class="clearfix"></div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <!--/TEST-->
+                            </div>
+
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content4" aria-labelledby="survey-tab">
+                                <br />
+                                <span class="section">คำถามทั่วไป</span>
+                                <!--TEST-->
+                                <div class="form formjob-2" data-step="formjob-2">
+                                    <!-- step 2 -->
+                                    <div id="form2" class="form-horizontal form-label-left" novalidate="">
+                                        <div class="col-xs-12 col-md-6">
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    สถานะ
+                                                </label>
+                                                <div class="col-md-8 col-sm-8 col-xs-12">
+                                                    <input readonly="readonly" type="text" value="@(survey != null && survey.survey_status == 1 ? "ทำแบบสอบถามแล้ว" : data.skip_status == 1 ? "ข้ามการประเมิน" : "ยังไม่ทำแบบสอบถาม")" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    ผลการประเมิน
+                                                </label>
+                                                <div class="col-md-8 col-sm-8 col-xs-12">
+                                                    <input class="form-control" readonly="readonly" style="color:red" type="text" value="@( survey != null ? ( survey.score.ToString() + (survey.negative == 1 ? " (ไม่ผ่านการประเมิน)" : "" ) ) : "" )">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    ประเมินวันที่
+                                                </label>
+                                                <div class="col-md-8 col-sm-8 col-xs-12">
+                                                    <input readonly="readonly" type="text" value="@(survey != null ? survey.cre_date.ToString() : "")" class="form-control">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-md-6">
+                                            @*<div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    สถานะ
+                                                </label>
+                                                <div class="col-md-8 col-sm-8 col-xs-12">
+                                                    <input readonly="readonly" type="text" value="@(data.skip_status == 1 ? "ข้ามการประเมิน" : "")" class="form-control">
+                                                </div>
+                                            </div>*@
+                                            <div class="form-group">
+                                                <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                    เหตุผลข้ามการประเมิน
+                                                </label>
+                                                <div class="col-md-8 col-sm-8 col-xs-12">
+                                                    <textarea class="form-control" readonly="readonly" rows="6">
+@(data.skip_note)
+</textarea>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="clearfix"></div>
+                                        <div class="col-xs-12 col-md-6">
+                                            <span class="section">ผลลัพธ์คำถามทั่วไป</span>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                                        <table class="table main-table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>ลำดับ</th>
+                                                                    <th>คำถาม</th>
+                                                                    <th>คำตอบ</th>
+                                                                    <th>คะแนน</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="tbodyUser">
+                                                                @if (survey != null)
+                                                                {
+                                                                    var order = 1;
+                                                                    foreach (var item in survey.qna.Where(w => w.jobs_category_id == 0 || w.jobs_category_id == null).ToList())
+                                                                    {
+                                                                        @*<td>@item.create_date.ToString("dd/MM/yyyy")</td>*@
+                                                                        <tr>
+                                                                            <td>
+                                                                                @*<p>@item.setorder</p>*@
+                                                                                <p>@order</p>
+                                                                            </td>
+                                                                            <td>
+                                                                                <p style="@(item.is_negative == 1 ? "color:red" : "" )">@item.question</p>
+                                                                            </td>
+                                                                            <td>@item.answer</td>
+                                                                            <td>@item.source</td>
+                                                                        </tr>
+                                                                        order++;
+                                                                    }
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-xs-12 col-md-6">
+                                            <span class="section">ผลลัพธ์คำถามตามหมวดหมู่</span>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                                        <table class="table main-table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>ลำดับ</th>
+                                                                    <th>คำถาม</th>
+                                                                    <th>คำตอบ</th>
+                                                                    <th>คะแนน</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="tbodyUser">
+                                                                @if (survey != null)
+                                                                {
+                                                                    var order = 1;
+                                                                    foreach (var item in survey.qna.Where(w => w.jobs_category_id > 0 && w.jobs_category_id != null).ToList())
+                                                                    {
+
+                                                                        <tr>
+                                                                            <td>
+                                                                                @*<p>@item.setorder</p>*@
+                                                                                <p>@order</p>
+                                                                            </td>
+                                                                            <td>
+                                                                                <p style="@(item.is_negative == 1 ? "color:red" : "" )">@item.question</p>
+                                                                            </td>
+                                                                            <td>@item.answer</td>
+                                                                            <td>@item.source</td>
+                                                                        </tr>
+                                                                        order++;
+                                                                    }
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="clearfix"></div>
+                                        <div class="col-xs-12 col-md-6">
+                                            <span class="section">ข้อเสนอแนะจากลูกค้า</span>
+                                            <div class="row">
+                                                <div class="form-group">
+
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        ข้อเสนอแนะ
+                                                    </label>
+                                                    <div class="col-md-8 col-sm-8 col-xs-12">
+                                                        <textarea readonly="readonly" type="text" class="form-control">@(survey != null ? survey.comment : "")</textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-xs-12 col-md-6">
+                                            <span class="section">ผลตอบรับจากศูนย์บริการ</span>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        อ่านแจ้งเตือน
+                                                    </label>
+                                                    <div class="col-md-8 col-sm-8 col-xs-12">
+                                                        <span>@(survey != null && survey.open_link != null ? survey.open_link.Value.ToString("dd/MM/yyyy") : "")</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-xs-12 col-md-6">
+                                        </div>
+
+                                        <div class="col-xs-12 col-md-6">
+
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        ผลตอบรับ
+                                                    </label>
+                                                    <div class="col-md-8 col-sm-8 col-xs-12">
+                                                        <textarea readonly="readonly" type="text" class="form-control">@(survey != null ? survey.feedback_note : "")</textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-xs-12 col-md-6">
+                                        </div>
+                                        <div class="col-xs-12 col-md-6">
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        วันที่
+                                                    </label>
+                                                    <div class="col-md-8 col-sm-8 col-xs-12">
+                                                        <span>@(survey != null ? survey.feedback_date.ToString() : "")</span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3 col-sm-2 col-xs-12" for="first-name">
+                                                        ลงชื่อ
+                                                    </label>
+                                                    <div class="col-md-8 col-sm-8 col-xs-12">
+                                                        <span>@(survey != null && survey.feedback_user != null ? survey.feedback_user.ToString() : "")</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <!--/TEST-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<style>
+
+
+    #map {
+        height: 400px; /* The height is 400 pixels */
+        width: 100%; /* The width is the width of the web page */
+    }
+
+    #btn_open_map:hover {
+        color: #fff;
+        background-color: #1428a0;
+    }
+
+    .btn_active_map {
+        color: #fff;
+        background-color: #1428a0;
+    }
+</style>
+@section header {
+    <style>
+
+
+        .process-gallery .col-xs-4 {
+            text-align: center;
+        }
+    </style>
+}
+@section scripts {
+    @*<script src="@{@path}assets/js/form-step.js"></script>*@
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=@{@googleMap_url}&libraries=places">
+    </script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <script>
+        var base_url = '@{@path}';
+        // Initialize and add the map
+        var map;
+        var markerCenter;
+        var infowindowCenter;
+        var infowindow;
+        var lat;
+        var long;
+        var tem_list_engineer;
+        var center = {
+            lat: _.isNaN(parseFloat('@data.customer_lat')) ? 13.7468204 : parseFloat('@data.customer_lat'),
+            lng: _.isNaN(parseFloat('@data.customer_long')) ? 100.53288029999999 : parseFloat('@data.customer_long')
+        };
+
+        var address;
+        var url = new URL(window.location.href.toString());
+        var page_url = url.searchParams.get("success");
+        $(document).ready(function () {
+            if ('@check_image' == "True") {
+                $.ajax({
+                    url: "@{@path}assets/js/form-step.js",
+                    dataType: "script"
+                });
+            }
+            if (page_url != null) {
+                new PNotify({
+                    title: "บันทึกสำเร็จแล้ว",
+                    delay: 2000,
+                    type: "success",
+                    styling: 'bootstrap3'
+                });
+            }
+
+            $("textarea#txtDescription").val('@data.description');
+            $("textarea#txtNote").val('@data.note');
+            $('.js-example-basic-single').select2({ width: '100%' });
+            var $selected = $("#selectEngineer").find('option:selected');
+            var id = $selected.data('id');
+            var tel1 = $selected.data('tel1');
+            var tel2 = $selected.data('tel2');
+            var tel3 = $selected.data('tel3');
+
+            var tel = tel1 != null && tel1 != "" ? tel1 : tel2 != null && tel2 != "" ? tel2 : tel3 != null && tel3 != "" ? tel3 : "";
+            tel = tel == 0 ? "" : tel;
+            id = id == 0 ? "" : id;
+            $("#en_id").val(id);
+            $("#en_tel1").val(tel);
+
+
+            //pac-input
+            var tem_address = '@data.street' + '@data.im_district' + '@data.im_province' + '@data.zipcode';
+            $("#pac-input").val(tem_address);
+            var store = '@data.store_id';
+            $.get(base_url + "job/GetFilterEngineer", function (res) {
+                tem_list_engineer = res;
+                domSelectEngineer(store,true);
+            });
+
+
+            if (window.location.hash == "#4") {
+                var hash = window.location.hash;
+
+                $('#link1').removeClass('active');
+                $('#tab_content1').removeClass('active in');
+
+                $('#link4').addClass('active');
+                $('#tab_content4').addClass('active in');
+            }
+
+        });
+
+        //calendar
+        $('#single_cal6').on('change', function () {
+            setDesctiptionEngineer();
+        });
+
+        function domSelectEngineer(store,first) {
+            //
+
+            @*var data = @Html.Raw(Json.Encode((List<s_tracking_mobile.Models.getEngineer>)ViewData["Engineer"]));*@
+            var list_engineer;
+            list_engineer = _.filter(tem_list_engineer, function (val) {
+                return val.site_id == store
+            });
+
+            $("#selectEngineer").html("");
+            var html_select_en = '';
+            html_select_en += '<option value="" data-id="0" data-tel1="0" data-tel2="0" data-tel3="0">Choose Engineer</option>';
+
+            $.each(list_engineer, function (idx, val) {
+                if (first) {
+                    html_select_en += '<option' + (@data.engineer_id == val.id ? " selected" : "") + ' value="' + val.id + '" data-id="' + val.id + '" data-tel1="' + val.tel1 + '" data-tel2="' + val.tel2 + '" data-tel3="' + val.tel3 + '">' + val.name + " " + (val.repair_type_info1 == null ? "" : val.repair_type_info1) + " " + (val.repair_type_info2 == null ? "" : val.repair_type_info2) + " " + (val.repair_type_info3 == null ? "" : val.repair_type_info3) + '</option>';
+                } else {
+                    html_select_en += '<option value="' + val.id + '" data-id="' + val.id + '" data-tel1="' + val.tel1 + '" data-tel2="' + val.tel2 + '" data-tel3="' + val.tel3 + '">' + val.name + " " + (val.repair_type_info1 == null ? "" : val.repair_type_info1) + " " + (val.repair_type_info2 == null ? "" : val.repair_type_info2) + " " + (val.repair_type_info3 == null ? "" : val.repair_type_info3) + '</option>';
+                }
+
+            });
+            $("#selectEngineer").append(html_select_en);
+        }
+
+
+        //store
+        $('#selectStore').on('change', function () {
+            $("#text_site_address").html("");
+            var $selected = $(this).find('option:selected');
+            var Districtes = $selected.data('dis');
+            var Sub_Districtes = $selected.data('subDis');
+            var Province = $selected.data('province');
+            var PostCode = $selected.data('postcode');
+            var Street = $selected.data('street');
+            var SiteAddress = $selected.data('site_address');
+            var Village = $selected.data('village');
+            var html = '';
+
+            html += SiteAddress != null && SiteAddress != "" ? SiteAddress : "";
+            html += Village != null && Village != "" ? " Soi " + Village : "";
+            html += Street != null && Street != "" ? " Road " + Street : "";
+            html += Sub_Districtes != null && Sub_Districtes != "" ? " Subdistrict " + Sub_Districtes : "";
+            html += Districtes != null && Districtes != "" ? " District " + Districtes : "";
+            html += Province != null && Province != "" ? " , " + Province : "";
+            html += PostCode != 0 ? PostCode : "-";
+
+            $("#text_site_address").append(html);
+
+
+            //SELECT ENGINEER
+            var store = document.getElementById('selectStore').value;
+            $("#description_engineer").html("");
+            $("#en_id").val("");
+            $("#en_tel1").val("");
+            domSelectEngineer(store,false);
+
+            @*var data = @Html.Raw(Json.Encode((List<s_tracking_mobile.Models.getEngineer>)ViewData["Engineer"]));
+
+            data = _.filter(data, function (val) {
+                return val.site_id == store
+            });
+
+            $("#selectEngineer").html("");
+            var html_select_en = '';
+            html_select_en += '<option value="" data-id="0" data-tel1="0" data-tel2="0" data-tel3="0">Choose Engineer</option>';
+            $.each(data, function (idx, val) {
+                html_select_en += '<option value="' + val.id + '" data-id="' + val.id + '" data-tel1="' + val.tel1 + '" data-tel2="' + val.tel2 + '" data-tel3="' + val.tel3 +'">' + val.engineer_name+'</option>'
+            });
+            $("#selectEngineer").append(html_select_en);*@
+        });
+
+        //engineer
+        $('#selectEngineer').on('change', function () {
+            setDesctiptionEngineer();
+            var $selected = $("#selectEngineer").find('option:selected');
+
+            var id = $selected.data('id');
+            id = id == 0 ? "" : id;
+
+            var tel1 = $selected.data('tel1');
+            var tel2 = $selected.data('tel2');
+            var tel3 = $selected.data('tel3');
+
+            var tel = tel1 != null && tel1 != "" ? tel1 : tel2 != null && tel2 != "" ? tel2 : tel3 != null && tel3 != "" ? tel3 : "";
+            tel = tel == 0 ? "" : tel;
+            $("#en_id").val(id);
+            $("#en_tel1").val(tel);
+        });
+
+        function save() {
+            var txtdate = $("#single_cal6").val().split("/")
+            var date = txtdate[2] + "/" + txtdate[1] + "/" + txtdate[0];
+            var app_time_hours = document.getElementById('app_time_hours').value;
+            var app_time_minute = document.getElementById('app_time_minute').value;
+            var app_to_time_hours = document.getElementById('app_to_time_hours').value;
+            var app_to_time_minute = document.getElementById('app_to_time_minute').value;
+            var category = document.getElementById('selectCategory').value;
+            var site = document.getElementById('selectStore').value;
+            var engineer = document.getElementById('selectEngineer').value;
+            var sub_category = document.getElementById('selectSubCategory').value;
+
+            var appointment_datetime = app_time_hours != "" && app_time_minute != "" ? new Date(date + " " + app_time_hours + ":" + app_time_minute) : "";
+            var appointment_to_datetime = app_to_time_hours != "" && app_to_time_minute != "" ? new Date(date + " " + app_to_time_hours + ":" + app_to_time_minute) : "";
+
+            if (sub_category != "" && category != "" && app_time_hours != "" && app_time_minute != "" && app_to_time_hours != "" && app_to_time_minute != "" && (appointment_datetime < appointment_to_datetime) && site != "" && engineer != "") {
+                var app_time_hours2 = parseInt(app_time_hours);
+                var app_time_minute2 = parseInt(app_time_minute);
+                var app_to_time_hours2 = parseInt(app_to_time_hours);
+                var app_to_time_minute2 = parseInt(app_to_time_minute);
+
+                app_time_hours2 = app_time_hours2 < 10 ? ("0" + app_time_hours2.toString()) : app_time_hours2;
+                app_time_minute2 = app_time_minute2 < 10 ? ("0" + app_time_minute2.toString()) : app_time_minute2;
+                app_to_time_hours2 = app_to_time_hours2 < 10 ? ("0" + app_to_time_hours2.toString()) : app_to_time_hours2;
+                app_to_time_minute2 = app_to_time_minute2 < 10 ? ("0" + app_to_time_minute2.toString()) : app_to_time_minute2;
+                var appointment_datetime2 = txtdate[2] + "-" + txtdate[1] + "-" + + txtdate[0] + " " + app_time_hours2 + ":" + app_time_minute2;
+                var appointment_to_datetime2 = txtdate[2] + "-" + txtdate[1] + "-" + + txtdate[0] + " " + app_to_time_hours2 + ":" + app_to_time_minute2;
+
+                var gender = $("input[name='gender']:checked").val() == "" ? 0 : $("input[name='gender']:checked").val() == "male" ? 1 : 2;
+                var formData = new FormData();
+                formData.append('id',@data.id);
+                formData.append('Job_guid', '@data.job_guid');
+                formData.append('CreateBy','@data.user_update');
+                formData.append('JobNumber','@data.service_order_no');
+                formData.append('Fullname', document.getElementById('txtFullname').value);
+                formData.append('Gender', gender);
+                formData.append('Email', document.getElementById('txtEmail').value);
+                formData.append('Phone_home', document.getElementById('txtPhomeHome').value);
+                formData.append('Phone_mobile', document.getElementById('txtPhoneMobile').value);
+                formData.append('Phone_office', document.getElementById('txtPhoneOffice').value);
+                formData.append('Home_address', document.getElementById('txtHomeAddress').value);
+                formData.append('Village', document.getElementById('txtVillage').value);
+                formData.append('Moo', document.getElementById('txtMoo').value);
+                formData.append('Street', document.getElementById('txtStreet').value);
+                formData.append('Sub_district', document.getElementById('selectSubDistrict').value);
+                formData.append('District', document.getElementById('selectDistrict').value);
+                formData.append('Province', document.getElementById('selectProvince').value);
+                formData.append('Zipcode', document.getElementById('txtZipCode').value);
+                formData.append('Category', category);
+                formData.append('Sub_category', sub_category);
+                formData.append('Model', document.getElementById('txtModel').value);
+                formData.append('Status_job', document.getElementById('selectStatus').value);
+                formData.append('Description', document.getElementById('txtDescription').value);
+                formData.append('Note', document.getElementById('txtNote').value);
+                formData.append('Store', site);
+                formData.append('Engineer', engineer);
+                formData.append('Appointment_datetime', appointment_datetime2);
+                formData.append('Appointment_to_datetime', appointment_to_datetime2);
+                formData.append('customer_lat', document.getElementById('txtcustomer_lat').value);
+                formData.append('customer_long', document.getElementById('txtcustomer_long').value);
+
+                 $.ajax({
+                     url: base_url + "job/btn_edit_job",
+                     type: "POST",
+                     contentType: false,
+                     processData: false,
+                     data: formData,//JSON.stringify(txt),
+                     success: function (obj) {
+                         $("#alert_select_site").innerHTML = ""; $("#edit_select_site").removeClass('warning');
+                         $("#alert_select_engineer").innerHTML = ""; $("#edit_select_engineer").removeClass('warning');
+                         $("#alert_select_time").innerHTML = ""; $("#edit_select_time").removeClass('warning');
+                         if (_.isArray(obj)) {
+                             $('#profile-tab2').parents(".col-xs-4").removeClass('active');
+                             $('#home-tab').parents(".col-xs-4").removeClass('active');
+                             $('#profile-tab').parents(".col-xs-4").removeClass('active');
+                             $('#tab_content1').removeClass('active in');
+                             $('#tab_content2').removeClass('active in');
+                             $('#tab_content3').removeClass('active in');
+                             $.each(obj, function (idx, val) {
+                                 var text = val.text;
+                                 var topic_div = "";
+                                 topic_div = val.name_div == "alert_select_site" ? "#edit_select_site" : "#edit_select_engineer";
+                                 $(topic_div).addClass('warning')
+                                 $(val.name_div).innerHTML = text
+                             });
+
+                             $('#profile-tab2').parents(".col-xs-4").addClass('active');
+                             $('#tab_content1').addClass('active in');
+                         }
+                         else {
+
+                             var url = base_url + "job/edit?id=" + '@data.job_guid' + "&success=1";
+                             window.location.href = url;
+                         }
+                    },
+                    error: function (err) {
+
+                    }
+                })
+            } else {
+                $("#alert_select_site").innerHTML = "";
+                $("#alert_select_engineer").innerHTML = "";
+                $("#alert_select_time").innerHTML = "";
+
+                $('#profile-tab2').parents(".col-xs-4").removeClass('active');
+                $('#home-tab').parents(".col-xs-4").removeClass('active');
+                $('#profile-tab').parents(".col-xs-4").removeClass('active');
+                $('#tab_content1').removeClass('active in');
+                $('#tab_content2').removeClass('active in');
+                $('#tab_content3').removeClass('active in');
+
+                site == "" ? $("#edit_select_site").addClass('warning') && ($("#alert_select_site").innerHTML = "กรุณาเลือกศูนย์บริการ") : $("#edit_select_site").removeClass('warning');
+                engineer == "" ? $("#edit_select_engineer").addClass('warning') && ($("#alert_select_engineer").innerHTML = "กรุณาเลือกช่าง") : $("#edit_select_engineer").removeClass('warning');
+                app_time_hours == "" || app_time_minute == "" || app_to_time_hours == "" || app_to_time_minute == "" ? $("#edit_select_time").addClass('warning') && ($("#alert_select_time").innerHTML = "กรุณาเลือกช่าง") : appointment_datetime > appointment_to_datetime ? $("#edit_select_time").addClass('warning') && ($("#alert_select_time").innerHTML = "ช่วงเวลาไม่ถูกต้อง") : $("#edit_select_time").removeClass('warning');
+
+                //test
+                category == "" ? $("#alert_selectCategory").addClass('warning') && ($("#txt_alert_selectCategory").innerHTML = "กรุณาเลือกประเภทสินค้า") : $("#alert_selectCategory").removeClass('warning');
+                sub_category == "" ? $("#alert_selectSubCategory").addClass('warning') && ($("#txt_alert_selectSubCategory").innerHTML = "กรุณาเลือกหมวดหมู่สินค้า") : $("#alert_selectSubCategory").removeClass('warning');
+                //test
+
+
+
+                if (site == "" || engineer == "" || app_time_hours == "" || app_time_minute == "" || app_to_time_hours == "" || app_to_time_minute == "") {
+                    $('#profile-tab2').parents(".col-xs-4").addClass('active');
+                    $('#tab_content1').addClass('active in');
+                } else {
+                    $('#profile-tab').parents(".col-xs-4").addClass('active');
+                    $('#tab_content3').addClass('active in');
+                }
+
+                var focus = site == "" ? "#selectStore" : engineer == "" ? "#selectEngineer" : app_time_hours == "" ? "#app_time_hours" : category == "" ? "#selectCategory" : "#selectSubCategory";
+                $(focus).focus();
+
+            }
+        }
+
+        function setDesctiptionEngineer() {
+            var $selected = $("#selectEngineer").find('option:selected');
+            var id = $selected.data('id');
+            var txtdate = $("#single_cal6").val().split("/")
+            txtdate = txtdate[0] + "/" + txtdate[1] + "/" + txtdate[2];
+
+            $.get(base_url + "job/get_descriptionEngineer", { engineer: id, date: txtdate }, function (res) {
+                $("#description_engineer").html("");
+                if (res.length > 0) {
+                    var html = '';
+                    var color = "";
+                    var text_status = '';
+                    res = _.sortBy(res, function (val) { return val.appointment_datetime })
+                    $.each(res, function (idx, val) {
+                        switch (val.status_job) {
+                            case 0: color = 'proceed'; text_status = 'Assigned'; break;
+                            case 2: color = 'pending'; text_status = 'Pending'; break;
+                            case 3: color = 'finished'; text_status = 'Completed'; break;
+                            case 4: color = 'cancel'; text_status = 'Cancel'; break;
+                            case 6: color = 'proceed'; text_status = 'Engineer Assigned'; break;
+                            case 7: color = 'proceed'; text_status = 'Start job'; break;
+                            case 8: color = 'proceed'; text_status = 'Start Repair'; break;
+                            case 9: color = 'proceed'; text_status = 'Job Delay'; break;
+                            case 10: color = 'proceed'; text_status = 'Overtime'; break;
+                            case 11: color = 'proceed'; text_status = 'LongTimeJourney'; break;
+                        }
+                        var d = new Date(val.appointment_datetime);
+                        var d2 = val.appointment_to_datetime != null ? new Date(val.appointment_to_datetime) : "";
+                        var text = val.appointment_datetime != null && val.appointment_to_datetime != null ? (d.getHours() < 10 ? "0" + d.getHours() : d.getHours()) + ":" + (d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes()) : "กรุณาตั้งเวลา";
+                        html += '<li class="job-status ' + color + '">'
+                        html += '<div class="job-time">'
+                        html += '<span class="start">' + text + '</span>'
+                        if (val.appointment_to_datetime != null) html += '<span class="end">' + (d2.getHours() < 10 ? "0" + d2.getHours() : d2.getHours()) + ":" + (d2.getMinutes() < 10 ? "0" + d2.getMinutes() : d2.getMinutes()) + '</span>'
+                        html += '</div>'
+                        html += '<div class="job-desc">'
+                        html += '<span class="' + color + '">' + text_status + '</span>'
+                        html += '<span>' + val.service_order_no + " " + val.model + '</span>'
+                        html += '</div>'
+                        html += '</li>'
+                    });
+                    $("#description_engineer").append(html);
+                }
+            });
+        }
+
+
+        function initMap() {
+            address = '@data.street' + '@data.im_district' + ' ' + '@data.im_province' + ' ' + '@data.zipcode';
+            //console.log(address)
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 18,
+                center: center,
+                mapTypeId: 'terrain'
+            });
+            markerCenter = new google.maps.Marker({
+                position: map.getCenter(),
+                map: map
+            });
+            infowindowCenter = new google.maps.InfoWindow;
+            markerCenter.setMap(map);
+
+            map.addListener('bounds_changed', function () {
+                changePointer();
+            });
+
+            /// SEARCH
+            var input = document.getElementById('pac-input');
+            var searchBox = new google.maps.places.SearchBox(input);
+            map.addListener('idle', function () {
+
+                searchBox.setBounds(map.getBounds());
+                var geocoder = new google.maps.Geocoder;
+                var infowindow = new google.maps.InfoWindow;
+                geocodeLatLng(geocoder, map, infowindow);
+            });
+
+            searchBox.addListener('places_changed', function () {
+
+                var places = searchBox.getPlaces();
+
+                if (places.length == 0) {
+                    return;
+                }
+                // deleteMarkers();
+                map.setCenter(places[0].geometry.location);
+                var geocoder = new google.maps.Geocoder;
+                var infowindow = new google.maps.InfoWindow;
+                geocodeLatLng(geocoder, map, infowindow);
+            });
+        }
+
+        // ADD MARKER
+
+        function changePointer() {
+            lat = map.center.lat();
+            long = map.center.lng();
+            document.getElementById('txtcustomer_lat').value = lat;
+            document.getElementById('txtcustomer_long').value = long;
+            markerCenter.setPosition(map.center);
+        }
+
+        //function changeMarker(location, content = null) {
+        function changeMarker(location, content) {
+            // var infowindow = new google.maps.InfoWindow;
+            infowindowCenter.setContent(content);
+            infowindowCenter.open(map, markerCenter);
+        }
+
+        ///    GEOREVERSE
+        function geocodeLatLng(geocoder, map, infowindow) {
+            geocoder.geocode({ 'location': map.getCenter() }, function (results, status) {
+
+                if (status === 'OK') {
+                    if (results[0]) {
+                        // deleteMarkers();
+                        changeMarker(map.getCenter(), results[0].formatted_address);
+                    } else {
+
+                    }
+                } else {
+
+                }
+            });
+        }
+
+        //// CURRENT DEVICE LOCATION
+
+        function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+            infoWindow.setPosition(pos);
+            infoWindow.setContent(browserHasGeolocation ?
+                'Error: The Geolocation service failed.' :
+                'Error: Your browser doesn\'t support geolocation.');
+            infoWindow.open(map);
+            }
+
+        function open_map() {
+            var html = '';
+            if ($("#btn_open_map").hasClass('btn_active_map')) {
+                $("#btn_open_map").removeClass("btn_active_map");
+                $("#div_map").html("");
+            } else {
+                $("#btn_open_map").addClass("btn_active_map");
+                html += '<span class="section">เลื่อนแผนที่เพื่อระบุตำแหน่ง</span>'
+                html += '<div class="col-md-4 col-sm-4 col-xs-12">'
+                html += '<input type="text" id="pac-input" required="required" placeholder="กรอกสถานที่" class="form-control">'
+                html += '</div>'
+                html += '<div id="map"></div>'
+                $("#div_map").append(html);
+                initMap();
+            }
+        }
+
+        function stamp_voice() {
+            var id = @data.id;
+            var check = confirm("ยืนยัน?");
+            if (check == true) {
+                $.ajax({
+                    url: base_url + "job/stamp_voice",
+                    type: "POST",
+                    data: { id: id },
+                    success: function (obj) {
+                        location.reload();
+                    },
+                    error: function (err) {
+
+                    }
+                })
+            }
+        }
+    </script>
+}

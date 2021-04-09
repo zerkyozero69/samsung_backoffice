@@ -1,0 +1,267 @@
+﻿
+@{
+    ViewBag.Title = "import";
+    var path = ViewData["Current_Path"].ToString();
+}
+
+<div class="content">
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h1 id="header_import_job">
+                        นำข้อมูลงานเข้าระบบ
+                    </h1>
+                    <div class="x_content table_tools">
+                        <div class="row">
+                            <div class="form-group">
+                                <div class="filter-job">
+                                    <div class="col-sm-3" id="btn_back_import_job">
+                                        <a href="@{@path}job/all" class="back-btn">
+                                            กลับ
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-3" id="btn_add_job">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+
+            <div class="x_panel form" id="body_import_job">
+                <!---->
+                <div class="modal js-loading-bar" style="margin-top:13%">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <div class="progress progress-popup">
+                                    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:100%">
+                                        Import file
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!---->
+
+
+                <div class="drop-upload">
+                    <span class="section">วางไฟล์งาน</span>
+                    <div class="x_content">
+                        <p>Drag multiple files to the box below for multi upload or click to select files. This is for demonstration purposes only, the files are not uploaded to any server.</p>
+                        <form action="import_file" name="excelfile" id="myform" class="dropzone" enctype="multipart/form-data"></form>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<style>
+    .progress-bar.animate {
+        width: 100%;
+    }
+</style>
+@section header {
+
+}
+@section scripts {
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <script>
+    var base_url = '@{@path}';
+    var $modal = $('.js-loading-bar');
+    var $bar = $modal.find('.progress-bar');
+        Dropzone.autoDiscover = false;
+    var myDropzone = $("#myform").dropzone({
+        init: function () {
+            this.on("addedfile", function () {
+                if (this.files[1] != null) {
+                    this.removeFile(this.files[1]);
+                }
+            });
+
+            this.on("processing", function (file) {
+                $modal.modal('show');
+                $bar.addClass('animate');
+            });
+            this.on("success", function (file, response) {
+                if (response.length > 0) {
+                    if (_.isUndefined(response[0].Id)) {
+                        $bar.removeClass('animate');
+                        $modal.modal('hide');
+                        var html = '';
+                        var btn = '';
+                        var btn_add = '';
+                        $("#body_import_job").html("");
+                        $("#btn_back_import_job").html("");
+                        //text
+                        document.getElementById('header_import_job').innerHTML = "ไฟล์ไม่สมบูรณ์";
+                        btn += '<a href="'+'@{@path}'+'job/all" class="tableview">กลับสู่หน้างานทั้งหมด</a>';
+                        $("#btn_back_import_job").append(btn);
+                        btn_add += '<a onclick="add_job()" class="tableview">เพิ่มงาน</a>';
+                        $("#btn_add_job").append(btn_add);
+
+                        html += '<div class="table-tabs">';
+                        html += '<div class="tab-content">';
+                        html += '<table class="table main-table">'
+                        html += '<thead>'
+                        html += '<tr>'
+                        html += '<th>ฟิลด์ที่ขาด</th>'
+                        html += '</tr>'
+                        html += '</thead>'
+                        html += '<tbody id="tbodyUser">'
+                        $.each(response, function (idx, val) {
+                            html += '<tr>'
+                            html += '<td>' + val.text + '</td>'
+                            html += '</tr>'
+                        });
+                        html += '</tbody>'
+                        html += '</table>'
+                        html += '<div class="clearfix"></div>'
+                        html += '</div>'
+                        html += '</div>'
+
+                        $("#body_import_job").append(html);
+                    } else {
+                        if (response[0].Id == "111111111111111111111111111")
+                        {
+                            $bar.removeClass('animate');
+                            $modal.modal('hide');
+                            var html = '';
+                            var btn = '';
+                            var btn_add = '';
+                            $("#body_import_job").html("");
+                            $("#btn_back_import_job").html("");
+                            //text
+                            document.getElementById('header_import_job').innerHTML = "ไฟล์ไม่สมบูรณ์";
+                            btn += '<a href="' + '@{@path}' + 'job/all" class="tableview">กลับสู่หน้างานทั้งหมด</a>';
+                            $("#btn_back_import_job").append(btn);
+                            btn_add += '<a onclick="add_job()" class="tableview">เพิ่มงาน</a>';
+                            $("#btn_add_job").append(btn_add);
+                            html += '<div class="table-tabs">';
+                            html += '<div class="tab-content">';
+                            html += '<p>เกิดข้อผิดพลาด กรุณา import file เป็นสกุล .xlsx เท่านั้น</p>'
+                            html += '<div class="clearfix"></div>'
+                            html += '</div>'
+                            html += '</div>'
+                            $("#body_import_job").append(html);
+                        } else if (response[0].Id == "error_file") {
+                            $bar.removeClass('animate');
+                            $modal.modal('hide');
+                            var html = '';
+                            var btn = '';
+                            var btn_add = '';
+                            $("#body_import_job").html("");
+                            $("#btn_back_import_job").html("");
+                            //text
+                            document.getElementById('header_import_job').innerHTML = "ไฟล์ไม่สมบูรณ์";
+                            btn += '<a href="' + '@{@path}' + 'job/all" class="tableview">กลับสู่หน้างานทั้งหมด</a>';
+                            $("#btn_back_import_job").append(btn);
+                            btn_add += '<a onclick="add_job()" class="tableview">เพิ่มงาน</a>';
+                            $("#btn_add_job").append(btn_add); 
+                            html += '<div class="table-tabs">';
+                            html += '<div class="tab-content">';
+                            html += '<span style="color:red">เกิดข้อผิดพลาดกรุณาเช็คข้อมูลใน file excel ทั้งหมด <a href="' + '@{@path}' + 'job/import">เพิ่มงานอีกครั้ง</a></span>'
+                            html += '<div class="clearfix"></div>'
+                            html += '</div>'
+                            html += '</div>'
+                            $("#body_import_job").append(html);
+                        }
+                        else {
+                            $bar.removeClass('animate');
+                            $modal.modal('hide');
+
+                            var html = '';
+                            var btn = '';
+                            var btn_add = '';
+                            $("#body_import_job").html("");
+                            $("#btn_back_import_job").html("");
+                            //text
+                            document.getElementById('header_import_job').innerHTML = "ข้อมูลที่นำเข้าระบบ";
+                            //set btn back to all job
+                            btn += '<a href="'+'@{@path}'+'job/all" class="tableview">กลับสู่หน้างานทั้งหมด</a>';
+                            $("#btn_back_import_job").append(btn);
+
+                            btn_add += '<a onclick="add_job()" class="tableview">เพิ่มงาน</a>';
+                            $("#btn_add_job").append(btn_add);
+
+                            html += '<div class="table-tabs">';
+                            html += '<div class="tab-content">';
+                            html += '<table class="table main-table">'
+                            html += '<thead>'
+                            html += '<tr>'
+                            html += '<th>ไอดีงาน</th>'
+                            html += '<th>หมายเลขงาน</th>'
+                            html += '<th>ชื่อศุนย์บริการ</th>'
+                            html += '<th>ชื่อช่าง</th>'
+                            html += '<th>สถานะ</th>'
+                            html += '</tr>'
+                            html += '</thead>'
+                            html += '<tbody id="tbodyUser">'
+                            $.each(response, function (idx, val) {
+                                var style = val.Update != "Update" && val.Update != "Is New" ? "color:red" : "";
+                                var text = val.Update != "Update" && val.Update != "Is New" ? "พบข้อผิดพลาด " : "";
+                                html += '<tr>'
+                                html += '<td>' + val.Id+'</td>'
+                                html += '<td>' + val.Serial+'</td>'
+                                html += '<td>' + val.Store+'</td>'
+                                html += '<td>' + val.Engineer+'</td>'
+                                html += '<td><span style="' + style + '">' + text + val.Update+'</span></td>'
+                                html += '</tr>'
+                            });
+                            html += '</tbody>'
+                            html += '</table>'
+                            html += '<div class="clearfix"></div>'
+                            html += '</div>'
+                            html += '</div>'
+
+                            $("#body_import_job").append(html);
+                        }
+                    }
+                } else {
+                    $bar.removeClass('animate');
+                    $modal.modal('hide');
+                    var html = '';
+                    var btn = '';
+                    var btn_add = '';
+                    $("#body_import_job").html("");
+                    $("#btn_back_import_job").html("");
+                    //text
+                    document.getElementById('header_import_job').innerHTML = "ไฟล์ไม่สมบูรณ์";
+                    btn += '<a href="' + '@{@path}' + 'job/all" class="tableview">กลับสู่หน้างานทั้งหมด</a>';
+                    $("#btn_back_import_job").append(btn);
+                    btn_add += '<a onclick="add_job()" class="tableview">เพิ่มงาน</a>';
+                    $("#btn_add_job").append(btn_add);
+                    html += '<div class="table-tabs">';
+                    html += '<div class="tab-content">';
+                    html += '<p>พบข้อผิดพลาดใน file excel </p>'
+                    html += '<div class="clearfix"></div>'
+                    html += '</div>'
+                    html += '</div>'
+                    $("#body_import_job").append(html);
+                }
+                
+            });
+            this.on("error", function (file, error, xhr) {
+
+            });
+        }
+    });
+
+
+
+    function add_job() {
+        window.location.href = base_url + "job/import"
+    }
+    </script>
+}
+
+
+

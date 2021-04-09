@@ -1,0 +1,66 @@
+﻿
+@{
+    ViewBag.Title = "success";
+    var path = ViewData["Current_Path"].ToString();
+}
+
+<div>
+    <div class="page-title">
+        <div class="title_left">
+            <h3>Success </h3>
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="x_panel">
+                <div class="table-tabs">
+                    <div class="tab-content">
+                        <table class="table main-table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>SERIAL</th>
+                                <th>STORE</th>
+                                <th>ENGINEER</th>
+                                <th>UPDATE</th>
+                            </tr>
+                            </thead>
+                            <tbody id="tbodyUser">
+                                @*@foreach (var item in (List<s_tracking_mobile.Models.job>)ViewData["Data-job"])
+                                {
+                                    <tr>
+                                        <td>@item.Id</td>
+                                        <td>@item.Serial</td>
+                                        <td>@item.Store</td>
+                                        <td>@item.Engineer</td>
+                                        <td>@item.Update</td>
+                                    </tr>
+                                }*@
+                            </tbody>
+                        </table>
+                    </div>
+                   
+                    <button style="margin-left:3%" class="btn btn-default" onclick="btn_back()" type="button">Back to all job</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section header {
+
+}
+@section scripts {
+@*<script>
+    $(document).ready(function () {
+        setTimeout(function () { window.location.href = '@{@path}' + "job/all"; }, 10000);
+    })
+    function btn_back() {
+        window.location.href = '@{@path}' + "job/all";
+    }
+</script>*@
+}
+
+

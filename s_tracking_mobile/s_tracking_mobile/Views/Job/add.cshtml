@@ -1,0 +1,304 @@
+﻿
+@{
+    ViewBag.Title = "add job";
+}
+
+<div>
+    <div class="clearfix"></div>
+    <div class="row">
+        <!--NEW-->
+        <div class="col-md-12 col-sm-6 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Edit User</h2>
+
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="" role="tabpanel" data-example-id="togglable-tabs">
+                        <ul id="myTab" class="nav nav-tabs bar_tabs" role="tablist">
+                            <li role="presentation" class="active">
+                                <a href="#tab_content1" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true">Customer Information</a>
+                            </li>
+                            <li role="presentation" class="">
+                                <a href="#tab_content2" role="tab" id="profile-tab" data-toggle="tab" aria-expanded="false">Job Information</a>
+                            </li>
+                            <li role="presentation" class="">
+                                <a href="#tab_content3" role="tab" id="profile-tab2" data-toggle="tab" aria-expanded="false">Engineer Information</a>
+                            </li>
+                        </ul>
+                        <div id="myTabContent" class="tab-content">
+                            <div role="tabpanel" class="tab-pane fade active in" id="tab_content1" aria-labelledby="home-tab">
+                                @*<h2>UserName : @item1.UserName</h2>*@
+                                <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            create job by <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" disabled id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Job number <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" disabled id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <p>Customer information</p>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            First Name <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Last Name <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">Gender</label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <div id="gender" class="btn-group" data-toggle="buttons">
+                                                <label>
+                                                    <input type="radio" name="gender" value="male"> &nbsp; Male &nbsp;
+                                                </label>
+                                                <label>
+                                                    <input type="radio" name="gender" value="female"> Female
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Email <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Mobile Number #1 <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Mobile Number #2 <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Mobile Number #3 <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Home Address No. <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Village / Building <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Moo / Soi <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Street <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">Sub District</label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <select class="form-control js-example-basic-single" id="selectSubDistrict">
+                                                <option value="">Choose SubDistrict</option>
+                                                @foreach (var item in (List<CommonLib.tb_amphures>)ViewData["Sub_Districtes"])
+                                                {
+                                                    <option value="@item.amphur_id">@item.amphur_name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">District</label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <select class="form-control js-example-basic-single" id="selectDistrict">
+                                                <option value="">Choose District</option>
+                                                @foreach (var item in (List<CommonLib.tb_districts>)ViewData["Districtes"])
+                                                {
+                                                    <option value="@item.district_id">@item.district_name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">Province</label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <select class="form-control js-example-basic-single" id="selectProvince">
+                                                <option value="">Choose Province</option>
+                                                @foreach (var item in (List<CommonLib.tb_provinces>)ViewData["Provinces"])
+                                                {
+                                                    <option value="@item.province_id">@item.province_name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Postcode <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content2" aria-labelledby="profile-tab">
+                                @*<h2>UserName : @item1.UserName</h2>*@
+                                <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Create job by <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" disabled id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <p>Job Information</p>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Job Number <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" disabled id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">Asset Category</label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <select class="form-control js-example-basic-single" id="selectProvince">
+                                                <option value="">Choose Category</option>
+                                                @foreach (var item in (List<CommonLib.tb_jobsl_category>)ViewData["Category"])
+                                                {
+                                                    <option value="@item.id">@item.name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">Sub Asset Category</label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <select class="form-control js-example-basic-single" id="selectProvince">
+                                                <option value="">Choose Sub Category</option>
+                                                @foreach (var item in (List<CommonLib.tb_jobsl_category>)ViewData["Sub-Category"])
+                                                {
+                                                    <option value="@item.id">@item.name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Product Name <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" id="txtSiteId" required="required" class="form-control col-md-7 col-xs-12">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">Status</label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <select class="form-control js-example-basic-single" id="selectProvince">
+                                                <option value="">Choose Province</option>
+                                                @*@foreach (var item in (List<CommonLib.tb_provinces>)ViewData["Provinces"])
+                                                {
+                                                    <option value="@item.province_id">@item.province_name</option>
+                                                }*@
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                            Job Number <span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <textarea id="message" required="required" class="form-control" name="message" data-parsley-trigger="keyup" data-parsley-minlength="20" data-parsley-maxlength="100" data-parsley-minlength-message="Come on! You need to enter at least a 20 caracters long comment.."
+                                                      data-parsley-validation-threshold="10"></textarea>
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content3" aria-labelledby="profile-tab">
+                                @*<h2>UserName : @item1.UserName</h2>*@
+                                <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left">
+                                    
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

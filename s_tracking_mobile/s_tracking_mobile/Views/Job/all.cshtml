@@ -1,0 +1,468 @@
+﻿
+@{
+    ViewBag.Title = "All Jobs";
+    var count = ViewData["Count-Data"];
+    var path = ViewData["Current_Path"].ToString();
+    
+}
+
+<div class="content">
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h1>
+                        งานทั้งหมด
+                    </h1>
+                    <div class="x_content table_tools">
+                        <div class="row">
+                            <div class="form-group">
+                                <div class="search-job">
+                                    <div class="col-sm-2">
+                                        <input type="text" id="txtSearchUser" class="form-control" placeholder="ค้นหาหมายเลขงานหรือชื่อลูกค้า">
+                                    </div>
+                                </div>
+                                <div class="col-md-1 col-sm-4 col-xs-12">
+                                    <select class="form-control" id="selectStore">
+
+                                        @if (ViewBag.id_store != 0)
+                                        {
+                                            foreach (var item in ((List<CommonLib.tb_store>)ViewData["all-Site"]).Where(w => w.id == ViewBag.id_store))
+                                            {
+                                                <option value="@item.id">@item.site_name</option>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <option value="0">ทุกศูนย์บริการ</option>
+                                            foreach (var item in (List<CommonLib.tb_store>)ViewData["all-Site"])
+                                            {
+                                                <option value="@item.id">@item.site_name</option>
+                                            }
+                                        }
+
+                                    </select>
+                                </div>
+                                <div class="col-md-1 col-sm-4 col-xs-12">
+                                    <select class="form-control" id="selectEngineer">
+                                        <option value="0">ทุกช่าง</option>
+                                        @if (ViewBag.id_store != 0)
+                                        {
+                                            foreach (var item in ((List<s_tracking_mobile.Models.getEngineer>)ViewData["all-Engineer"]).Where(w => w.site_id == ViewBag.id_store))
+                                            {
+                                                <option value="@item.id">@item.name</option>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            foreach (var item in (List<s_tracking_mobile.Models.getEngineer>)ViewData["all-Engineer"])
+                                            {
+                                                <option value="@item.id">@item.name</option>
+                                            }
+                                        }
+
+                                    </select>
+                                </div>
+                                <div class="col-md-1 col-sm-4 col-xs-12">
+                                    <select class="form-control" id="selectStatus">
+                                        <option value="99">ทุกสเตตัส</option>
+                                        <option value="0">Assigned</option>
+                                        <option value="2">Pending</option>
+                                        <option value="3">Completed</option>
+                                        <option value="4">Cancel</option>
+                                        <option value="6">Engineer Assigned</option>
+                                        <option value="7">Start Job</option>
+                                        <option value="8">Start Repair</option>
+                                        <option value="9">Job Delay</option>
+                                        <option value="10">Over Time</option>
+                                    </select>
+                                </div>
+                                <div class="filter-job">
+                                    <div class="col-sm-2">
+                                        @{
+                                            var start_date = DateTime.Today.AddDays(-7);
+                                            <input type="text" value="@start_date.ToString("dd/MM/yyyy")" class="form-control start-date-input" placeholder="วันที่เริ่มงาน" id="single_cal2">
+                                        }
+                                    </div>
+                                    <div class="col-sm-2">
+                                        @{
+                                            var end_date = DateTime.Today;
+                                            <input type="text" value="@end_date.ToString("dd/MM/yyyy")" class="form-control end-date-input" placeholder="วันที่จบงาน" id="single_cal3">
+                                        }
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <a onclick="btn_search()" class="tableview">
+                                            ค้นหา
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                    <div class="filter-job">
+                                        <div class="col-sm-2">
+                                            <a onclick="export_file()" class="  btn_export">
+                                                Export
+                                            </a>
+                                        </div>
+                                    </div>
+                                
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <div class="table-tabs">
+                <div class="tab-content">
+                    <table class="table main-table">
+                        <thead>
+                            <tr>
+                                <th>หมายเลขงาน</th>
+                                <th>สถานะงาน</th>
+                                <th>วันที่เข้าซ่อม / เวลา</th>
+                                <th>ชื่อลูกค้า</th>
+                                <th>สินค้า</th>
+                                <th>ชื่อช่างซ่อม</th>
+                                <th style="text-align:center">แบบสอบถาม Negative</th>
+                                <th>ประเภท</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyData">
+                            @foreach (var item in ((List<s_tracking_mobile.Models.all_job>)ViewData["data-job"]))
+                            {
+                                if (item.id != null)
+                                {
+                            <tr>
+                                <td>@item.job_no</td>
+                                <td>@item.status.Replace("_", " ")</td>
+                                <td>
+                                    @if (item.duedate != null && item.to_duedate != null)
+                                    {
+                                        var text = item.duedate.Value.ToString("dd/MMM/yyy <br /> เวลา HH:mm");
+                                        var text2 = "-" + item.to_duedate.Value.Hour + ":" + (item.to_duedate.Value.Minute < 10 ? "0" + item.to_duedate.Value.Minute.ToString() : item.to_duedate.Value.Minute.ToString());
+                                        <p>@Html.Raw(text) @Html.Raw(text2)</p>
+                                    }
+                                    else
+                                    {
+                                        @*if (item.duedate != null)
+                {
+                    var text = item.duedate.Value.ToString("dd/MMM/yyy");
+                    <p>@Html.Raw(text) <span class="set-time-alert"> / กรุณาตั้งเวลา</span></p>
+                }
+                else
+                {
+                    <span class="set-time-alert">กรุณาตั้งเวลา</span>
+                }*@
+                                        <span class="set-time-alert">กรุณาตั้งเวลา</span>
+                                    }
+                                </td>
+                                <td>@item.customer_name</td>
+                                <td>@item.asset</td>
+                                <td>@item.engineer_name</td>
+                                <td style="text-align:center">@(item.negative != null ? "true" : "false" )</td>
+                                <td>@item.job_type</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="dLabel">
+                                            <li>
+                                                <a href="@(path)job/edit?id=@(item.job_guid)">
+                                                    <span> แก้ไข</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a onclick="btn_delete_site(@item.id)">
+                                                    <span> ลบ</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                    <div class="clearfix"></div>
+
+                    <nav aria-label="Page navigation" id="datatable_paginate">
+                        <ul id="pagination_check" class="pagination"></ul>
+                    </nav>
+
+                    <div class="clearfix"></div>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="loadMe" style="top:35%;" tabindex="-1" role="dialog" aria-labelledby="loadMeLabel">
+                        <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-content">
+                                <div class="modal-body text-center">
+                                    <div class="loader"></div>
+                                    <div clas="loader-txt">
+                                        <p><b>Loading...</b></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--/modal-->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .all_job_active {
+        color: #fff;
+        background-color: #1428a0;
+    }
+    .loader {
+        position: relative;
+        text-align: center;
+        margin: 15px auto 35px auto;
+        z-index: 9999;
+        display: block;
+        width: 80px;
+        height: 80px;
+        border: 10px solid rgba(0, 0, 0, .3);
+        border-radius: 50%;
+        border-top-color: #000;
+        animation: spin 1s ease-in-out infinite;
+        -webkit-animation: spin 1s ease-in-out infinite;
+    }
+
+    @@keyframes spin {
+      to {
+        -webkit-transform: rotate(360deg);
+      }
+    }
+
+    @@-webkit-keyframes spin {
+      to {
+        -webkit-transform: rotate(360deg);
+      }
+    }
+    .modal-content {
+        border-radius: 0px;
+        box-shadow: 0 0 20px 8px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-backdrop.show {
+        opacity: 0.75;
+    }
+
+</style>
+@section scripts {
+<script>
+    var save_limit = 0;
+    var limit_to = 100;
+    var base_url = '@{@path}';
+    var tem_list_engineer;
+    $(document).ready(function () {
+        pagination(@count, 1, 1);
+        $.get(base_url + "job/GetFilterEngineer", function (res) {
+            tem_list_engineer = res;
+        });
+    });
+
+    $('#selectStore').on('change', function () {
+        //SELECT ENGINEER
+        var store = document.getElementById('selectStore').value;
+        @*var data = @Html.Raw(Json.Encode((List<s_tracking_mobile.Models.getEngineer>)ViewData["all-Engineer"]));*@
+        var list_engineer;
+        if (store != "0") {
+            list_engineer = _.filter(tem_list_engineer, function (val) {
+                return val.site_id == store;
+            });
+        } else {
+            list_engineer = tem_list_engineer;
+        }
+
+        $("#selectEngineer").html("");
+        var html_select_en = '';
+        html_select_en += '<option value="0">ทุกช่าง</option>';
+        $.each(list_engineer, function (idx, val) {
+            html_select_en += '<option value="' + val.id + '">' + val.name + '</option>'
+        });
+        $("#selectEngineer").append(html_select_en);
+    });
+
+    function btn_search() {
+        var s_start_date = document.getElementById('single_cal2').value;
+        var s_end_date = document.getElementById('single_cal3').value;
+
+        setData(1, 1)
+        setTimeout(function () {
+            $("#loadMe").modal("hide");
+        }, 5500);
+
+        //var moment_start = moment(s_start_date, "DD/MM/YYYY"); 
+        //var moment_end = moment(s_end_date, "DD/MM/YYYY"); 
+
+        //var start_date = new Date(moment_start);
+        //var end_date = new Date(moment_end);
+        //var Difference_In_Time = end_date.getDate() - start_date.getDate();
+
+        //if (Difference_In_Time <= 7) {
+        //    setData(1, 1)
+        //    setTimeout(function () {
+        //        $("#loadMe").modal("hide");
+        //    }, 5500);
+        //} else {
+        //    alert("ค้นหาข้อมูลได้ไม่เกิน 7 วัน");
+        //}
+
+    }
+
+    function setData(page, limit) {
+        $("#tbodyData").html("");
+        $("#loadMe").modal({
+            backdrop: "static", //remove ability to close modal with click
+            keyboard: false, //remove option to close with keyboard
+            show: true //Display loader!
+        });
+        var search = document.getElementById('txtSearchUser').value;
+        var status = document.getElementById('selectStatus').value;
+        var s_start_date = document.getElementById('single_cal2').value;
+        var s_end_date = document.getElementById('single_cal3').value;
+        var store = document.getElementById('selectStore').value;
+        var engineer = document.getElementById('selectEngineer').value;
+        var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        search = search.trim();
+        $.get(base_url + "job/btn_search_and_skip", { search: search, s_start_date: s_start_date, s_end_date: s_end_date, page: page, status: status, store: store, engineer: engineer }, function (val) {
+            if (val.length > 0) {
+                //pagination
+                $('.pagination').html("");
+                var count = val[0].count;
+                pagination(count, page,limit);
+                var html = '';
+                $.each(val, function (idx, obj) {
+                    var date = new Date(obj.duedate);
+                    var date2 = new Date(obj.to_duedate);
+                    var text = date.getDate() + "/" + monthNames[date.getMonth()] + "/" + date.getFullYear() + "<br/> เวลา " + date.getHours() + ":" + (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes());
+                    var text2 = " - " + date2.getHours() + ":" + (date2.getMinutes() < 10 ? "0" + date2.getMinutes() : date2.getMinutes())
+                    var status = obj.status;
+                    
+                    html += '<tr>';
+                    html += '<td>' + obj.job_no + '</td>';
+                    html += '<td>' + status.replace("_", " ") + '</td>';
+                    html += '<td>' + (obj.duedate != null && obj.to_duedate != null ? text : "") + (obj.to_duedate != null ? text2 : "<span class=\"set-time-alert\">กรุณาตั้งเวลา</span>") + '</td>';
+                    html += '<td>' + obj.customer_name + '</td>';
+                    html += '<td>' + (obj.asset != null ? obj.asset : "") + '</td>';
+                    html += '<td>' + (obj.engineer_name != null ? obj.engineer_name : "") + '</td>';
+                    html += '<td style="text-align:center" >' + (obj.negative != null ? "true" : "false") + '</td>';
+                    html += '<td>' + obj.job_type + '</td>';
+                    html += '<td>';
+                    html += '<div class="dropdown">';
+                    html += '<a id="dLabel" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></a>';
+                    html += '<ul class="dropdown-menu" aria-labelledby="dLabel">';
+                    html += '<li><a href="' + base_url + "job/edit?id=" + obj.job_guid +'"><span> แก้ไข</span></a></li>';
+                    html += '<li><a onclick="btn_delete_site(\'' + obj.id + '\')"><span> ลบ</span></a></li>';
+                    html += '</ul>'
+                    html += '</div>';
+                    html += '</td>';
+                    html += '</tr>';
+                });
+                $("#tbodyData").append(html);
+                $("#loadMe").modal("hide");
+            } else {
+                $('.pagination').html("");
+                var html = '';
+                html += '<tr><td rowspan="8"><center>ไม่มีงานที่ค้นหา</center></tr>'
+                $("#tbodyData").append(html);
+                $("#loadMe").modal("hide");
+            }
+        });
+        $("html, body").animate({ scrollTop: 0 }, "slow");
+    }
+
+    function pagination(count, page, limit) {
+        page = parseInt(page);
+        limit = parseInt(limit);
+        limit_to = limit == 1 ? 100 : save_limit < limit ? (save_limit + 1) == limit ? limit_to + 20 : (20*page) + 60 : limit_to - 20; 
+        //save_limit = limit;
+        var count = count;
+        var html = "";
+        var count_page = 0;
+        $('.pagination').html("");
+        if (count > 0) {
+            var style_back = page == 1 ? "pointer-events: none;" : "";
+            html += '<li><a onClick="click_first()" aria-label="Previous"><span aria-hidden="true">First</span></a></li>';
+            html += '<li style="' + style_back +'"><a onClick="click_back()" aria-label="Previous"><span aria-hidden="true"><span class="glyphicon glyphicon-menu-left"></span></span></a></li>';
+            for (i = 0; i < Math.min(count, limit_to); i += 20) { // maybe use code
+                count_page++;
+                var style = count_page == page ? 'active' : '';
+                if (limit == 1 || ((limit - 1) < (count_page + 2))) { html += '<li data-page="' + count_page + '" class="paginate_button ' + style + '"><a onClick="click_page(\'' + count_page + '\')" aria-controls="datatable" tabindex="0">' + count_page + '</a></li>'; }
+            }
+            var style_next = count_page == page ? "pointer-events: none;" : "";
+            html += '<li style="' + style_next +'"><a onClick="click_next()" aria-label="Next"><span aria-hidden="true"><span class="glyphicon glyphicon-menu-right"></span></span></a></li>';
+            html += '<li><a onClick="click_last(\'' + count + '\')" aria-label="Next"><span aria-hidden="true">Last</span></a></li>';
+            $('.pagination').append(html);
+        }
+    }
+
+    function click_first() {
+        setData(1, 1);
+    }
+
+    function click_last(count) {
+        var page = count / 20;
+        page = Math.ceil(page);
+        setData(page, page);
+    
+    }
+
+    function click_back() {
+        var page = $('ul.pagination').find('li.active').data('page');
+        setData((page - 1), (page - 1));
+    }
+
+    function click_next() {
+        var page = $('ul.pagination').find('li.active').data('page');
+        setData((page + 1), (page + 1));
+    }
+
+    function click_page(page) {
+        setData(page, page)
+    }
+
+    function btn_delete_site(id) {
+        var check = confirm("Are you sure for delete Job ?");
+        if (check == true) {
+            $.ajax({
+                url: base_url + "job/btn_delete_job",
+                type: "POST",
+                data: { id: id },
+                success: function (val) {
+                    location.reload();
+                },
+                error: function (err) {
+
+                }
+            })
+        }
+    }
+
+    function edit(id) {
+        window.location.href = base_url + "job/edit?id=" + id;
+    }
+
+    function export_file() {
+        var search = document.getElementById('txtSearchUser').value;
+        var s_date = document.getElementById('single_cal2').value;
+        var e_date = document.getElementById('single_cal3').value;
+        var status = document.getElementById('selectStatus').value;
+        var store = document.getElementById('selectStore').value;
+        var engineer = document.getElementById('selectEngineer').value;
+        window.open(
+            base_url + 'export/export_file?id=3&search=' + search + '&s_date=' + s_date + '&e_date=' + e_date + '&status=' + status + '&store=' + store + '&engineer=' + engineer,
+            '_blank' 
+        );
+    }
+
+</script>
+}
+
